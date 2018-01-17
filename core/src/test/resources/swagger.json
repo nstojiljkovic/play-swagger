@@ -6,7 +6,7 @@
     }
   ],
   "definitions": {
-    "com.iheart.playSwagger.DictType": {
+    "com.github.nstojiljkovic.playSwagger.DictType": {
       "type": "object",
       "properties": {
         "id": {

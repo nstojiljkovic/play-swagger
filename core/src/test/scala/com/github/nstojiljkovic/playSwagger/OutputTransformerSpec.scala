@@ -1,6 +1,6 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
-import com.iheart.playSwagger.OutputTransformer.SimpleOutputTransformer
+import com.github.nstojiljkovic.playSwagger.OutputTransformer.SimpleOutputTransformer
 import org.specs2.mutable.Specification
 import play.api.libs.json._
 
@@ -107,12 +107,13 @@ class EnvironmentVariablesSpec extends Specification {
 
 class EnvironmentVariablesIntegrationSpec extends Specification {
   implicit val cl = getClass.getClassLoader
+  implicit val typeDefinitionGenerator = new DefaultTypeDefinitionGenerator
 
   "integration" >> {
     "generate api with placeholders in place" >> {
       val envs = Map("LAST_TRACK_DESCRIPTION" → "Last track", "PLAYED_TRACKS_DESCRIPTION" → "Add tracks")
       val json = SwaggerSpecGenerator(
-        PrefixDomainModelQualifier("com.iheart"),
+        PrefixDomainModelQualifier("com.github.nstojiljkovic"),
         outputTransformers = MapVariablesTransformer(envs) :: Nil).generate("env.routes").get
       val pathJson = json \ "paths"
       val stationJson = (pathJson \ "/api/station/{sid}/playedTracks/last" \ "get").as[JsObject]
@@ -126,7 +127,7 @@ class EnvironmentVariablesIntegrationSpec extends Specification {
   "fail to generate API if environment variable is not found" >> {
     val envs = Map("LAST_TRACK_DESCRIPTION" → "Last track")
     val json = SwaggerSpecGenerator(
-      PrefixDomainModelQualifier("com.iheart"),
+      PrefixDomainModelQualifier("com.github.nstojiljkovic"),
       outputTransformers = MapVariablesTransformer(envs) :: Nil).generate("env.routes")
     json must beFailedTry[JsObject].withThrowable[IllegalStateException]("Unable to find variable PLAYED_TRACKS_DESCRIPTION")
   }

@@ -1,6 +1,6 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
-import com.iheart.playSwagger.Domain.{ CustomTypeMapping, CustomMappings }
+import com.github.nstojiljkovic.playSwagger.Domain.CustomMappings
 import org.specs2.mutable.Specification
 import play.api.libs.json._
 
@@ -26,6 +26,8 @@ case class Child(name: String) extends Parent
 
 class SwaggerSpecGeneratorSpec extends Specification {
   implicit val cl = getClass.getClassLoader
+  implicit val typeDefinitionGenerator = new DefaultTypeDefinitionGenerator
+
   val gen = SwaggerSpecGenerator()
 
   "full path" >> {
@@ -80,6 +82,7 @@ class SwaggerSpecGeneratorSpec extends Specification {
 
 class SwaggerSpecGeneratorIntegrationSpec extends Specification {
   implicit val cl = getClass.getClassLoader
+  implicit val typeDefinitionGenerator = new DefaultTypeDefinitionGenerator
 
   "integration" >> {
 
@@ -90,7 +93,7 @@ class SwaggerSpecGeneratorIntegrationSpec extends Specification {
       (json \ "paths" \ "/player/{pid}/context/{bid}").asOpt[JsObject] must beSome
     }
 
-    lazy val json = SwaggerSpecGenerator(false, "com.iheart").generate("test.routes").get
+    lazy val json = SwaggerSpecGenerator(false, "com.github.nstojiljkovic").generate("test.routes").get
     lazy val pathJson = json \ "paths"
     lazy val definitionsJson = json \ "definitions"
     lazy val postBodyJson = (pathJson \ "/post-body" \ "post").as[JsObject]
@@ -100,15 +103,15 @@ class SwaggerSpecGeneratorIntegrationSpec extends Specification {
     lazy val playerJson = (pathJson \ "/api/player/{pid}/context/{bid}" \ "get").as[JsObject]
     lazy val playerAddTrackJson = (pathJson \ "/api/player/{pid}/playedTracks" \ "post").as[JsObject]
     lazy val resourceJson = (pathJson \ "/api/resource").as[JsObject]
-    lazy val allOptionalDefJson = (definitionsJson \ "com.iheart.playSwagger.AllOptional").as[JsObject]
-    lazy val artistDefJson = (definitionsJson \ "com.iheart.playSwagger.Artist").as[JsObject]
-    lazy val trackJson = (definitionsJson \ "com.iheart.playSwagger.Track").as[JsObject]
-    lazy val studentJson = (definitionsJson \ "com.iheart.playSwagger.Student").asOpt[JsObject]
-    lazy val teacherJson = (definitionsJson \ "com.iheart.playSwagger.Teacher").asOpt[JsObject]
-    lazy val polymorphicContainerJson = (definitionsJson \ "com.iheart.playSwagger.PolymorphicContainer").asOpt[JsObject]
-    lazy val polymorphicItemJson = (definitionsJson \ "com.iheart.playSwagger.PolymorphicItem").asOpt[JsObject]
-    lazy val enumContainerJson = (definitionsJson \ "com.iheart.playSwagger.EnumContainer").asOpt[JsObject]
-    lazy val overriddenDictTypeJson = (definitionsJson \ "com.iheart.playSwagger.DictType").as[JsObject]
+    lazy val allOptionalDefJson = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.AllOptional").as[JsObject]
+    lazy val artistDefJson = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.Artist").as[JsObject]
+    lazy val trackJson = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.Track").as[JsObject]
+    lazy val studentJson = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.Student").asOpt[JsObject]
+    lazy val teacherJson = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.Teacher").asOpt[JsObject]
+    lazy val polymorphicContainerJson = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.PolymorphicContainer").asOpt[JsObject]
+    lazy val polymorphicItemJson = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.PolymorphicItem").asOpt[JsObject]
+    lazy val enumContainerJson = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.EnumContainer").asOpt[JsObject]
+    lazy val overriddenDictTypeJson = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.DictType").as[JsObject]
 
     def parametersOf(json: JsValue): Seq[JsValue] = {
       (json \ "parameters").as[JsArray].value
@@ -147,13 +150,13 @@ class SwaggerSpecGeneratorIntegrationSpec extends Specification {
     }
 
     "read schema of referenced type" >> {
-      (trackJson \ "properties" \ "artist" \ "$ref").asOpt[String] === Some("#/definitions/com.iheart.playSwagger.Artist")
+      (trackJson \ "properties" \ "artist" \ "$ref").asOpt[String] === Some("#/definitions/com.github.nstojiljkovic.playSwagger.Artist")
     }
 
     "read seq of referenced type" >> {
       val relatedProp = (trackJson \ "properties" \ "related")
       (relatedProp \ "type").asOpt[String] === Some("array")
-      (relatedProp \ "items" \ "$ref").asOpt[String] === Some("#/definitions/com.iheart.playSwagger.Artist")
+      (relatedProp \ "items" \ "$ref").asOpt[String] === Some("#/definitions/com.github.nstojiljkovic.playSwagger.Artist")
     }
 
     "read seq of primitive type" >> {
@@ -169,7 +172,7 @@ class SwaggerSpecGeneratorIntegrationSpec extends Specification {
 
     "read trait with container" >> {
       polymorphicContainerJson must beSome[JsObject]
-      (polymorphicContainerJson.get \ "properties" \ "item" \ "$ref").asOpt[String] === Some("#/definitions/com.iheart.playSwagger.PolymorphicItem")
+      (polymorphicContainerJson.get \ "properties" \ "item" \ "$ref").asOpt[String] === Some("#/definitions/com.github.nstojiljkovic.playSwagger.PolymorphicItem")
       polymorphicItemJson must beSome[JsObject]
     }
 
@@ -195,7 +198,7 @@ class SwaggerSpecGeneratorIntegrationSpec extends Specification {
       val params = parametersOf(addTrackJson)
       params.length === 1
       (params.head \ "in").asOpt[String] === Some("body")
-      (params.head \ "schema" \ "$ref").asOpt[String] === Some("#/definitions/com.iheart.playSwagger.Track")
+      (params.head \ "schema" \ "$ref").asOpt[String] === Some("#/definitions/com.github.nstojiljkovic.playSwagger.Track")
     }
 
     "generate body parameter without in if already provided" >> {
@@ -335,12 +338,12 @@ class SwaggerSpecGeneratorIntegrationSpec extends Specification {
     }
 
     "should contain schemas in responses" >> {
-      (postBodyJson \ "responses" \ "200" \ "schema" \ "$ref").asOpt[String] === Some("#/definitions/com.iheart.playSwagger.FooWithSeq2")
+      (postBodyJson \ "responses" \ "200" \ "schema" \ "$ref").asOpt[String] === Some("#/definitions/com.github.nstojiljkovic.playSwagger.FooWithSeq2")
     }
 
     "should contain schemas in requests" >> {
       val paramJson = parametersOf(addTrackJson).head
-      (paramJson \ "schema" \ "$ref").asOpt[String] === Some("#/definitions/com.iheart.playSwagger.Track")
+      (paramJson \ "schema" \ "$ref").asOpt[String] === Some("#/definitions/com.github.nstojiljkovic.playSwagger.Track")
     }
 
     "excluded domain object should contain only spec from swagger.json" >> {
@@ -380,7 +383,7 @@ class SwaggerSpecGeneratorIntegrationSpec extends Specification {
     }
 
     "handle type aliases in post body" >> {
-      val properties = (definitionsJson \ "com.iheart.playSwagger.FooWithSeq2" \ "properties").as[JsObject]
+      val properties = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.FooWithSeq2" \ "properties").as[JsObject]
       (properties \ "abc1" \ "items" \ "type").as[String] === "string"
       (properties \ "abc2" \ "items" \ "items" \ "type").as[String] === "integer"
     }
@@ -418,15 +421,15 @@ class SwaggerSpecGeneratorIntegrationSpec extends Specification {
 
     "generate definition reference according to custom type mappings" >> {
 
-      val properties = (definitionsJson \ "com.iheart.playSwagger.Animal" \ "properties").as[JsObject]
+      val properties = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.Animal" \ "properties").as[JsObject]
       (properties \ "keeper" \ "$ref").as[String] === "#/definitions/Keeper"
 
-      (definitionsJson \ "com.iheart.playSwagger.Keeper").toOption must beEmpty
+      (definitionsJson \ "com.github.nstojiljkovic.playSwagger.Keeper").toOption must beEmpty
     }
 
     "custom type mappings in definition should be included in required" >> {
 
-      val required = (definitionsJson \ "com.iheart.playSwagger.Animal" \ "required").as[JsArray]
+      val required = (definitionsJson \ "com.github.nstojiljkovic.playSwagger.Animal" \ "required").as[JsArray]
 
       required.value must contain(JsString("keeper"))
     }
@@ -460,14 +463,14 @@ class SwaggerSpecGeneratorIntegrationSpec extends Specification {
     }
 
     "should retain $refs in 'swagger-custom-mappings'" >> {
-      (definitionsJson \ "com.iheart.playSwagger.Child").toOption.isDefined === true
+      (definitionsJson \ "com.github.nstojiljkovic.playSwagger.Child").toOption.isDefined === true
     }
   }
 
   "integration v3" >> {
-    lazy val json = SwaggerSpecGenerator(true, "com.iheart").generate("testV3.routes").get
+    lazy val json = SwaggerSpecGenerator(true, "com.github.nstojiljkovic").generate("testV3.routes").get
     lazy val componentSchemasJson = json \ "components" \ "schemas"
-    lazy val trackJson = (componentSchemasJson \ "com.iheart.playSwagger.Track").as[JsObject]
+    lazy val trackJson = (componentSchemasJson \ "com.github.nstojiljkovic.playSwagger.Track").as[JsObject]
 
     "read definition from referenceTypes" >> {
       (trackJson \ "properties" \ "name" \ "type").as[String] === "string"

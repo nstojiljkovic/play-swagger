@@ -1,26 +1,29 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
 import java.io.File
+
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.iheart.playSwagger.Domain._
-import com.iheart.playSwagger.OutputTransformer.SimpleOutputTransformer
+import com.github.nstojiljkovic.playSwagger.Domain._
+import com.github.nstojiljkovic.playSwagger.OutputTransformer.SimpleOutputTransformer
 import play.api.libs.json._
 import ResourceReader.read
 import org.yaml.snakeyaml.Yaml
 import SwaggerParameterMapper.mapParam
+import org.yaml.snakeyaml.constructor.Constructor
+
 import scala.collection.immutable.ListMap
 import play.routes.compiler._
 
-import scala.util.{ Try, Success, Failure }
+import scala.util.{ Failure, Success, Try }
 
 object SwaggerSpecGenerator {
   private val marker = "##"
   val customMappingsFileName = "swagger-custom-mappings"
   val baseSpecFileName = "swagger"
-  def apply(swaggerV3: Boolean, domainNameSpaces: String*)(implicit cl: ClassLoader): SwaggerSpecGenerator = {
+  def apply(swaggerV3: Boolean, domainNameSpaces: String*)(implicit cl: ClassLoader, typeDefinitionGenerator: TypeDefinitionGenerator): SwaggerSpecGenerator = {
     SwaggerSpecGenerator(PrefixDomainModelQualifier(domainNameSpaces: _*), swaggerV3 = swaggerV3)
   }
-  def apply(outputTransformers: Seq[OutputTransformer], domainNameSpaces: String*)(implicit cl: ClassLoader): SwaggerSpecGenerator = {
+  def apply(outputTransformers: Seq[OutputTransformer], domainNameSpaces: String*)(implicit cl: ClassLoader, typeDefinitionGenerator: TypeDefinitionGenerator): SwaggerSpecGenerator = {
     SwaggerSpecGenerator(PrefixDomainModelQualifier(domainNameSpaces: _*), outputTransformers = outputTransformers)
   }
 
@@ -31,7 +34,7 @@ final case class SwaggerSpecGenerator(
   modelQualifier:        DomainModelQualifier   = PrefixDomainModelQualifier(),
   defaultPostBodyFormat: String                 = "application/json",
   outputTransformers:    Seq[OutputTransformer] = Nil,
-  swaggerV3:             Boolean                = false)(implicit cl: ClassLoader) {
+  swaggerV3:             Boolean                = false)(implicit cl: ClassLoader, typeDefinitionGenerator: TypeDefinitionGenerator) {
   import SwaggerSpecGenerator.{ customMappingsFileName, baseSpecFileName, MissingBaseSpecException }
   // routes with their prefix
   type Routes = (String, Seq[Route])
@@ -291,8 +294,8 @@ final case class SwaggerSpecGenerator(
   }
 
   private def parseYaml[T](yamlStr: String)(implicit fjs: Reads[T]): T = {
-    val yaml = new Yaml()
-    val map = yaml.load(yamlStr)
+    val yaml = new Yaml(new Constructor(classOf[Object]))
+    val map = yaml.load(yamlStr).asInstanceOf[Object]
     val mapper = new ObjectMapper()
     val jsonString = mapper.writeValueAsString(map)
     Json.parse(jsonString).as[T]

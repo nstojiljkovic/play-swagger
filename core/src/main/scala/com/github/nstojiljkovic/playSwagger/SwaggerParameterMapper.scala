@@ -1,6 +1,6 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
-import com.iheart.playSwagger.Domain.{ CustomMappings, CustomSwaggerParameter, GenSwaggerParameter, SwaggerParameter }
+import com.github.nstojiljkovic.playSwagger.Domain.{ CustomMappings, CustomSwaggerParameter, GenSwaggerParameter, SwaggerParameter }
 import play.api.libs.json._
 import play.routes.compiler.Parameter
 import scala.reflect.runtime.universe

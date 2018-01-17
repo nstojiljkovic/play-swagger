@@ -1,8 +1,8 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
 import java.util.regex.Pattern
 
-import com.iheart.playSwagger.OutputTransformer.SimpleOutputTransformer
+import com.github.nstojiljkovic.playSwagger.OutputTransformer.SimpleOutputTransformer
 import play.api.libs.json.{ JsArray, JsString, JsValue, JsObject }
 
 import scala.util.matching.Regex

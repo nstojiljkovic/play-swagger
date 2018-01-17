@@ -1,4 +1,4 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
 object SampleScalaEnum extends Enumeration {
   type SampleScalaEnum = Value

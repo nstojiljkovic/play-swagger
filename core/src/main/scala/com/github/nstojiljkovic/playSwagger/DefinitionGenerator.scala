@@ -1,14 +1,13 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
-import com.iheart.playSwagger.Domain.{ CustomMappings, SwaggerParameter, GenSwaggerParameter, Definition }
-import com.iheart.playSwagger.SwaggerParameterMapper.mapParam
-import play.routes.compiler.Parameter
+import com.github.nstojiljkovic.playSwagger.Domain.{ CustomMappings, Definition, GenSwaggerParameter, SwaggerParameter }
+import com.github.nstojiljkovic.playSwagger.SwaggerParameterMapper.mapParam
 
 import scala.reflect.runtime.universe._
 
 final case class DefinitionGenerator(
   modelQualifier: DomainModelQualifier = PrefixDomainModelQualifier(),
-  mappings:       CustomMappings       = Nil)(implicit cl: ClassLoader) {
+  mappings:       CustomMappings       = Nil)(implicit cl: ClassLoader, typeDefinitionGenerator: TypeDefinitionGenerator) {
 
   def dealiasParams(t: Type): Type = {
     appliedType(t.dealias.typeConstructor, t.typeArgs.map { arg ⇒
@@ -17,18 +16,8 @@ final case class DefinitionGenerator(
   }
 
   def definition(tpe: Type): Definition = {
-    val fields = tpe.decls.collectFirst {
-      case m: MethodSymbol if m.isPrimaryConstructor ⇒ m
-    }.toList.flatMap(_.paramLists).headOption.getOrElse(Nil)
-
-    val properties = fields.map { field ⇒
-      //TODO: find a better way to get the string representation of typeSignature
-      val name = field.name.decodedName.toString
-      val typeName = dealiasParams(field.typeSignature).toString
-      // passing None for 'fixed' and 'default' here, since we're not dealing with route parameters
-      val param = Parameter(name, typeName, None, None)
-      mapParam(param, modelQualifier, mappings)
-    }
+    val clazz: Class[_] = runtimeMirror(cl).runtimeClass(tpe)
+    val properties = typeDefinitionGenerator.parameters(clazz).map(mapParam(_, modelQualifier, mappings))
 
     Definition(
       name = tpe.typeSymbol.fullName,
@@ -72,6 +61,8 @@ final case class DefinitionGenerator(
 }
 
 object DefinitionGenerator {
+  implicit val typeDefinitionGenerator: TypeDefinitionGenerator = new DefaultTypeDefinitionGenerator
+
   def apply(
     domainNameSpace:             String,
     customParameterTypeMappings: CustomMappings)(implicit cl: ClassLoader): DefinitionGenerator =

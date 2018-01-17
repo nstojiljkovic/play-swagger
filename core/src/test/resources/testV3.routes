@@ -10,7 +10,7 @@ GET     /:pid/tracks/search               controllers.Player.searchTrack(pid, ke
 #    content:
 #      application/json:
 #        schema:
-#          $ref: '#/components/schemas/com.iheart.playSwagger.Track'
+#          $ref: '#/components/schemas/com.github.nstojiljkovic.playSwagger.Track'
 ###
 POST     /:pid/playedTracks             controllers.Player.addPlayedTracks(pid)
 
@@ -18,6 +18,6 @@ POST     /:pid/playedTracks             controllers.Player.addPlayedTracks(pid)
 #  responses:
 #    200:
 #      schema:
-#        $ref: '#/definitions/com.iheart.playSwagger.Animal'
+#        $ref: '#/definitions/com.github.nstojiljkovic.playSwagger.Animal'
 ###
-GET     /zoo/zone/:zid/animals/:aid               controllers.Animals.search(zid: com.iheart.playSwagger.ZoneId, aid: com.iheart.playSwagger.AnimalId)
+GET     /zoo/zone/:zid/animals/:aid               controllers.Animals.search(zid: com.github.nstojiljkovic.playSwagger.ZoneId, aid: com.github.nstojiljkovic.playSwagger.AnimalId)

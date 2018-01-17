@@ -1,4 +1,4 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
 trait DomainModelQualifier {
   def isModel(className: String): Boolean

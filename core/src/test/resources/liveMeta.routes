@@ -17,7 +17,7 @@ GET     /api/artist/:aid/playedTracks/recent           controllers.LiveMeta.play
 #    200:
 #      description: Profile information for a user
 #      schema:
-#        $ref: '#/definitions/com.iheart.playSwagger.Track'
+#        $ref: '#/definitions/com.github.nstojiljkovic.playSwagger.Track'
 ###
 GET     /api/station/:sid/playedTracks/last             @controllers.LiveMeta.playedByStation(sid: Int)
 
@@ -27,7 +27,7 @@ GET     /api/station/:sid/playedTracks/last             @controllers.LiveMeta.pl
 #    - name: body
 #      description: track information
 #      schema:
-#        $ref: '#/definitions/com.iheart.playSwagger.Track'
+#        $ref: '#/definitions/com.github.nstojiljkovic.playSwagger.Track'
 #  responses:
 #    200:
 #      description: success

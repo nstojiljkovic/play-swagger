@@ -1,4 +1,4 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
 import java.io.{ IOException, InputStream }
 import scala.util.{ Failure, Try }

@@ -1,8 +1,7 @@
 
-organization in ThisBuild := "com.iheart"
+organization in ThisBuild := "com.github.nstojiljkovic"
 
 resolvers +=  Resolver.bintrayRepo("scalaz", "releases")
-
 
 lazy val noPublishSettings = Seq(
   publish := (),
@@ -35,7 +34,7 @@ lazy val sbtPlaySwagger = project.in(file("sbtPlugin"))
   .enablePlugins(BuildInfoPlugin)
   .settings(
     buildInfoKeys := Seq[BuildInfoKey](name, version),
-    buildInfoPackage := "com.iheart.playSwagger",
+    buildInfoPackage := "com.github.nstojiljkovic.playSwagger",
     name := "sbt-play-swagger",
     description := "sbt plugin for play swagger spec generation",
     sbtPlugin := true,

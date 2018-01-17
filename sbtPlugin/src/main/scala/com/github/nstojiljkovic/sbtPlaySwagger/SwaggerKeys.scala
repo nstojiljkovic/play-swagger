@@ -1,4 +1,4 @@
-package com.iheart.sbtPlaySwagger
+package com.github.nstojiljkovic.sbtPlaySwagger
 
 import java.io.File
 
@@ -12,5 +12,5 @@ trait SwaggerKeys {
   val swaggerRoutesFile = SettingKey[String]("swaggerRoutesFile", "the root routes file with which play-swagger start to parse")
   val swaggerOutputTransformers = SettingKey[Seq[String]]("swaggerOutputTransformers", "list of output transformers for processing swagger file")
   val swaggerV3 = SettingKey[Boolean]("swaggerV3", "whether to to produce output compatible with Swagger 3 (also knwon as OpenAPI 3)")
-  val envOutputTransformer = "com.iheart.playSwagger.EnvironmentVariablesTransformer"
+  val envOutputTransformer = "com.github.nstojiljkovic.playSwagger.EnvironmentVariablesTransformer"
 }

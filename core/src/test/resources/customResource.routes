@@ -1,1 +1,1 @@
-GET     /    com.iheart.controllers.Resource.get()
+GET     /    com.github.nstojiljkovic.controllers.Resource.get()

@@ -8,7 +8,7 @@ addSbtPlugin("com.typesafe.play" %% "sbt-plugin" % "2.6.7")
   if(pluginVersion == null)
     throw new RuntimeException("""|The system property 'plugin.version' is not defined.
                                   |Specify this property using the scriptedLaunchOpts -D.""".stripMargin)
-  else addSbtPlugin("com.iheart" %% "sbt-play-swagger" % pluginVersion)
+  else addSbtPlugin("com.github.nstojiljkovic" %% "sbt-play-swagger" % pluginVersion)
 }
 
 libraryDependencies += "io.spray" %% "spray-json" % "1.3.3"

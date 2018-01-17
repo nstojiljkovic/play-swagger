@@ -1,8 +1,8 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
 import org.specs2.mutable.Specification
 import play.api.libs.json.{ Json, JsString }
-import com.iheart.playSwagger.Domain._
+import com.github.nstojiljkovic.playSwagger.Domain._
 import play.routes.compiler.Parameter
 
 class SwaggerParameterMapperSpec extends Specification {
@@ -67,14 +67,14 @@ class SwaggerParameterMapperSpec extends Specification {
     }
 
     "map java enum to enum constants" >> {
-      mapParam(Parameter("javaEnum", "com.iheart.playSwagger.SampleJavaEnum", None, None)) === GenSwaggerParameter(
+      mapParam(Parameter("javaEnum", "com.github.nstojiljkovic.playSwagger.SampleJavaEnum", None, None)) === GenSwaggerParameter(
         name = "javaEnum",
         `type` = Option("string"),
         enum = Option(Seq("DISABLED", "ACTIVE")))
     }
 
     "map scala enum to enum constants" >> {
-      mapParam(Parameter("scalaEnum", "com.iheart.playSwagger.SampleScalaEnum.Value", None, None)) === GenSwaggerParameter(
+      mapParam(Parameter("scalaEnum", "com.github.nstojiljkovic.playSwagger.SampleScalaEnum.Value", None, None)) === GenSwaggerParameter(
         name = "scalaEnum",
         `type` = Option("string"),
         enum = Option(Seq("One", "Two")))

@@ -1,4 +1,4 @@
-package com.iheart.sbtPlaySwagger
+package com.github.nstojiljkovic.sbtPlaySwagger
 
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
 import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
@@ -9,7 +9,7 @@ import com.typesafe.sbt.web.Import._
 
 object SwaggerPlugin extends AutoPlugin {
   lazy val SwaggerConfig = config("play-swagger").hide
-  lazy val playSwaggerVersion = com.iheart.playSwagger.BuildInfo.version
+  lazy val playSwaggerVersion = com.github.nstojiljkovic.playSwagger.BuildInfo.version
 
   object autoImport extends SwaggerKeys
 
@@ -25,7 +25,7 @@ object SwaggerPlugin extends AutoPlugin {
     ivyConfigurations += SwaggerConfig,
     resolvers += Resolver.jcenterRepo,
     //todo: remove hardcoded org name using BuildInfo
-    libraryDependencies += "com.iheart" %% "play-swagger" % playSwaggerVersion % SwaggerConfig,
+    libraryDependencies += "com.github.nstojiljkovic" %% "play-swagger" % playSwaggerVersion % SwaggerConfig,
     swaggerDomainNameSpaces := Seq(),
     swaggerV3 := false,
     swaggerTarget := target.value / "swagger",
@@ -42,7 +42,7 @@ object SwaggerPlugin extends AutoPlugin {
         swaggerV3.value.toString ::
         Nil
       val swaggerClasspath = data((fullClasspath in Runtime).value) ++ update.value.select(configurationFilter(SwaggerConfig.name))
-      runner.value.run("com.iheart.playSwagger.SwaggerSpecRunner", swaggerClasspath, args, streams.value.log).failed foreach (sys error _.getMessage)
+      runner.value.run("com.github.nstojiljkovic.playSwagger.SwaggerSpecRunner", swaggerClasspath, args, streams.value.log).failed foreach (sys error _.getMessage)
       file
     }.value,
     unmanagedResourceDirectories in Assets += swaggerTarget.value,

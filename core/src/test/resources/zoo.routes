@@ -2,6 +2,6 @@
 #  responses:
 #    200:
 #      schema:
-#        $ref: '#/definitions/com.iheart.playSwagger.Animal'
+#        $ref: '#/definitions/com.github.nstojiljkovic.playSwagger.Animal'
 ###
-GET     /zone/:zid/animals/:aid               controllers.Animals.search(zid: com.iheart.playSwagger.ZoneId, aid: com.iheart.playSwagger.AnimalId)
+GET     /zone/:zid/animals/:aid               controllers.Animals.search(zid: com.github.nstojiljkovic.playSwagger.ZoneId, aid: com.github.nstojiljkovic.playSwagger.AnimalId)

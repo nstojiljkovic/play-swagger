@@ -6,6 +6,6 @@
 #    - name: notMagic
 #      description: This is not an important parameter
 ###
-POST  /magic/echoMagic/:type        com.iheart.playSwagger.test.echoMagic(type, notMagic)
+POST  /magic/echoMagic/:type        com.github.nstojiljkovic.playSwagger.test.echoMagic(type, notMagic)
 
 

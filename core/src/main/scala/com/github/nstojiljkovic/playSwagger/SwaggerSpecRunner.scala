@@ -1,4 +1,4 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
 import java.nio.file.{ Files, Paths, StandardOpenOption }
 
@@ -6,6 +6,7 @@ import scala.util.{ Success, Failure, Try }
 
 object SwaggerSpecRunner extends App {
   implicit def cl = getClass.getClassLoader
+  implicit val typeDefinitionGenerator: TypeDefinitionGenerator = new DefaultTypeDefinitionGenerator
 
   val (targetFile :: routesFile :: domainNameSpaceArgs :: outputTransformersArgs :: swaggerV3String :: Nil) = args.toList
   private def fileArg = Paths.get(targetFile)
@@ -16,7 +17,7 @@ object SwaggerSpecRunner extends App {
     val transformers = transformersStrs.map { clazz ⇒
       Try(cl.loadClass(clazz).asSubclass(classOf[OutputTransformer]).newInstance()) match {
         case Failure(ex: ClassCastException) ⇒
-          throw new IllegalArgumentException("Transformer should be a subclass of com.iheart.playSwagger.OutputTransformer:" + clazz, ex)
+          throw new IllegalArgumentException("Transformer should be a subclass of com.github.nstojiljkovic.playSwagger.OutputTransformer:" + clazz, ex)
         case Failure(ex) ⇒ throw new IllegalArgumentException("Could not create transformer", ex)
         case Success(el) ⇒ el
       }

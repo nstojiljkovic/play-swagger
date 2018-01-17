@@ -6,16 +6,16 @@
   - type: java\.time\.Duration
     specAsParameter:
       - type: integer
-  - type: com\.iheart\.playSwagger\.AnimalId
+  - type: com\.github\.nstojiljkovic\.playSwagger\.AnimalId
     specAsParameter: []
-  - type: com\.iheart\.playSwagger\.ZoneId
+  - type: com\.github\.nstojiljkovic\.playSwagger\.ZoneId
     specAsParameter:
       - type: string
-  - type: com\.iheart\.playSwagger\.Keeper
+  - type: com\.github\.nstojiljkovic\.playSwagger\.Keeper
     specAsParameter: []
     specAsProperty:
       $ref: "#/definitions/Keeper"
-  - type: com\.iheart\.playSwagger\.Parent
+  - type: com\.github\.nstojiljkovic\.playSwagger\.Parent
     specAsParameter: []
     specAsProperty:
-      $ref: "#/definitions/com.iheart.playSwagger.Child"
+      $ref: "#/definitions/com.github.nstojiljkovic.playSwagger.Child"

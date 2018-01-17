@@ -15,23 +15,23 @@
 
 ->   /zoo                  zoo.Routes
 
-GET  /abc                  com.iheart.Application.test()
+GET  /abc                  com.github.nstojiljkovic.Application.test()
 
 ###
 #  summary: Creates a FooWithSeq
 #  responses:
 #    200:
 #      schema:
-#        $ref: '#/definitions/com.iheart.playSwagger.FooWithSeq2'
+#        $ref: '#/definitions/com.github.nstojiljkovic.playSwagger.FooWithSeq2'
 ###
-POST /post-body            com.iheart.Application.postBody()
+POST /post-body            com.github.nstojiljkovic.Application.postBody()
 
 ###
 #  parameters:
 #    - name: body
 #      description: polymorphic example
 #      schema:
-#        $ref: '#/definitions/com.iheart.playSwagger.PolymorphicContainer'
+#        $ref: '#/definitions/com.github.nstojiljkovic.playSwagger.PolymorphicContainer'
 ###
 POST     /somethingPolymorphic             controllers.Player.somethingPolymorphic()
 
@@ -40,7 +40,7 @@ POST     /somethingPolymorphic             controllers.Player.somethingPolymorph
 #    - name: body
 #      description: java enum example
 #      schema:
-#        $ref: '#/definitions/com.iheart.playSwagger.EnumContainer'
+#        $ref: '#/definitions/com.github.nstojiljkovic.playSwagger.EnumContainer'
 ###
 POST     /somethingWithEnum                controllers.Player.somethingWithEnum()
 
@@ -49,12 +49,12 @@ POST     /somethingWithEnum                controllers.Player.somethingWithEnum(
 #    - name: body
 #      description: option example
 #      schema:
-#        $ref: '#/definitions/com.iheart.playSwagger.AllOptional'
+#        $ref: '#/definitions/com.github.nstojiljkovic.playSwagger.AllOptional'
 #  responses:
 #    default:
 #      description: Something optional
 #      schema:
-#        $ref: '#/definitions/com.iheart.playSwagger.AllOptional'
+#        $ref: '#/definitions/com.github.nstojiljkovic.playSwagger.AllOptional'
 ###
 POST     /somethingOptional                controllers.Player.somethingOptional()
 
@@ -72,7 +72,7 @@ POST  /iWantAQueryBody                     controllers.Test.queryBodyHandler(bod
 #    default:
 #      description: Something optional
 #      schema:
-#        $ref: '#/definitions/com.iheart.playSwagger.Parent'
+#        $ref: '#/definitions/com.github.nstojiljkovic.playSwagger.Parent'
 ###
 GET  /iWantAChild                     controllers.Test.queryForChild
 

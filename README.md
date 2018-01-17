@@ -1,10 +1,3 @@
-
-[![Build Status](https://travis-ci.org/iheartradio/play-swagger.svg)](https://travis-ci.org/iheartradio/play-swagger)
-[![Coverage Status](https://coveralls.io/repos/iheartradio/play-swagger/badge.svg?branch=master&service=github)](https://coveralls.io/github/iheartradio/play-swagger?branch=master)
-[![Stories in Ready](https://badge.waffle.io/iheartradio/play-swagger.svg?label=ready&title=Ready)](http://waffle.io/iheartradio/play-swagger)
-[ ![Download](https://api.bintray.com/packages/iheartradio/maven/play-swagger/images/download.svg) ](https://bintray.com/iheartradio/maven/play-swagger/_latestVersion)
-[![Gitter](https://badges.gitter.im/iheartradio/play-swagger.svg)](https://gitter.im/iheartradio/play-swagger?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
 # Swagger API spec generator for Play
 
 A library that generates swagger specs from route files and case class reflection, no code annotation needed.  
@@ -43,7 +36,7 @@ This allows newly added endpoints to be automatically included in swagger with s
  #    200:
  #      description: success
  #      schema:
- #        $ref: '#/definitions/com.iheart.api.Protocol.CardCreated'
+ #        $ref: '#/definitions/com.github.nstojiljkovic.api.Protocol.CardCreated'
  ###
  POST      /users/:profileId/contexts/:contextName/cards       controllers.api.Cards.createCard(profileId: Int, contextName: Option[String])
 
@@ -51,7 +44,7 @@ This allows newly added endpoints to be automatically included in swagger with s
 
 Note that everything in the comment is just standard swagger definition, and it $refs to a case class CardCreated, which is defined in a Protocol object, and it references another case class Card. Here is the source code:
 ```scala
-package com.iheart.api
+package com.github.nstojiljkovic.api
 
 object Protocol {
   case class CardCreated(card: Card)
@@ -81,28 +74,8 @@ You can find the setup in the example project as well.
 #### Step 1
 For play2.6 add Swagger sbt plugin dependency to your plugins.sbt
 ```scala
-addSbtPlugin("com.iheart" % "sbt-play-swagger" % "0.6.1-PLAY2.6")
+addSbtPlugin("com.github.nstojiljkovic" % "sbt-play-swagger" % "0.7.4")
 ```
-
-For play2.5 add Swagger sbt plugin dependency to your plugins.sbt (see [the releases tab](https://github.com/iheartradio/play-swagger/releases) for the latest versions)
-
-```scala
-addSbtPlugin("com.iheart" % "sbt-play-swagger" % "0.6.2")
-```
-
-For play 2.6 and sbt 0.1.3 please use a special release build with play 2.6 binary.
-```scala
-addSbtPlugin("com.iheart" % "sbt-play-swagger" % "0.6.2-PLAY2.6")
-```
-
-For play 2.6 and sbt 1.0 please use 
-```scala
-addSbtPlugin("com.iheart" %% "sbt-play-swagger" % "0.7.1")
-```
-
-For play 2.4 please use a special release build with play 2.4 binary (No longer maintained after 0.6.0)
-```scala
-addSbtPlugin("com.iheart" % "sbt-play-swagger" % "0.6.0-PLAY2.4")
 
 ```
 Then enable it for your Play app - in build.sbt add `SwaggerPlugin` to the root project like
@@ -235,11 +208,11 @@ Body content is specified as a special parameter in swagger. So you need to crea
 #  parameters:
 #    - name: body
 #      schema:
-#        $ref: '#/definitions/com.iheart.api.Track'
+#        $ref: '#/definitions/com.github.nstojiljkovic.api.Track'
 ###
 POST   /tracks       controller.Api.createTrack()
 ```
-Again, play-swagger will generate the definition for com.iheart.api.Track case class
+Again, play-swagger will generate the definition for com.github.nstojiljkovic.api.Track case class
 
 #### How do I use a different "host" for different environment?
 Use the [alternative setup](docs/AlternativeSetup.md). The library returns play JsObject, you can change however you want like
@@ -272,7 +245,7 @@ swaggerFileName := "customSwagger.json"
 ```
 
 #### Where to find more examples?
-In the [tests](/core/src/test/scala/com/iheart/playSwagger/SwaggerSpecGeneratorSpec.scala)!
+In the [tests](/core/src/test/scala/com/github/nstojiljkovic/playSwagger/SwaggerSpecGeneratorSpec.scala)!
 
 
 #### How to use markup in swagger specs

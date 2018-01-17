@@ -1,4 +1,4 @@
-package com.iheart
+package com.github.nstojiljkovic
 
 package object playSwagger {
   type Line = String

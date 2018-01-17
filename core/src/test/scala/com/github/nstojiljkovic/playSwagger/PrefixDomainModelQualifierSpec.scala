@@ -1,4 +1,4 @@
-package com.iheart.playSwagger
+package com.github.nstojiljkovic.playSwagger
 
 import org.specs2.mutable.Specification
 
