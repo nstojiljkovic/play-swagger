@@ -20,5 +20,6 @@ cache:
 script:
   - sbt clean sbtPlaySwagger/scripted
   - sbt ';project playSwagger;clean;coverage;test'
+  - sbt ';project playSwaggerJackson;clean;coverage;test'
 after_success:
   - sbt ';project playSwagger;coverageReport'

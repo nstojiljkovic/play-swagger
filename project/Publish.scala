@@ -1,11 +1,12 @@
 import sbt._
 import Keys._
-import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, releaseProcess, releaseStepCommand}
+import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, releaseProcess, releaseStepCommand, releaseVersionFile}
 import sbtrelease.ReleaseStateTransformations._
 
 object Publish {
 
-  val coreSettings = Seq(
+  val commonSettings = Seq(
+    releaseVersionFile := baseDirectory.value / "version.sbt",
     publishMavenStyle := true,
     publishTo := {
       val nexus = "https://oss.sonatype.org/"
@@ -25,8 +26,7 @@ object Publish {
       setNextVersion,
       commitNextVersion,
       releaseStepCommand("sonatypeReleaseAll"),
-      pushChanges
-    ),
+      pushChanges),
     pomExtra := (
       <url>https://github.com/nstojiljkovic/play-swagger</url>
         <licenses>
@@ -49,7 +49,9 @@ object Publish {
         </developers>),
     publishArtifact in Test := false)
 
-  val sbtPluginSettings = Seq(
-    licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.html")),
+  val coreSettings = commonSettings
+  val sbtPluginSettings = commonSettings
+  val noPublish = Seq(
+    publishArtifact := false,
     publishMavenStyle := false)
 }

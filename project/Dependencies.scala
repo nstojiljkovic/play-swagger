@@ -23,4 +23,13 @@ object Dependencies {
     "org.specs2" %% "specs2-core" % Versions.specs2 % "test",
     "org.specs2" %% "specs2-mock" % Versions.specs2 % "test")
 
+  val javaTest = Seq(
+    "junit" % "junit" % "4.12" % "test",
+    "com.novocode" % "junit-interface" % "0.11" % "test")
+
+  val javaCompat = Seq(
+    "org.scala-lang.modules" % "scala-java8-compat_2.12" % "0.8.0")
+
+  val jackson = Seq(
+    "com.fasterxml.jackson.module" % "jackson-module-jsonSchema" % "2.8.11")
 }

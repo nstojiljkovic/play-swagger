@@ -1,21 +1,17 @@
+name := "Play Swagger"
 
 organization in ThisBuild := "com.github.nstojiljkovic"
 
-resolvers +=  Resolver.bintrayRepo("scalaz", "releases")
+resolvers += Resolver.bintrayRepo("scalaz", "releases")
 
-lazy val noPublishSettings = Seq(
-  publish := (),
-  publishLocal := (),
-  publishArtifact := false
-)
-
-lazy val root = project.in(file("."))
-  .aggregate(playSwagger, sbtPlaySwagger)
-  .settings(sourcesInBase := false)
-  .settings(noPublishSettings:_*)
+lazy val root =
+  (project in file("."))
+    .settings(Publish.commonSettings ++ Publish.noPublish)
+    .settings(sourcesInBase := false)
+    .aggregate(playSwagger, playSwaggerJackson, sbtPlaySwagger)
 
 lazy val playSwagger = project.in(file("core"))
-  .settings(Publish.coreSettings ++ Format.settings ++ Testing.settings)
+  .settings(Publish.commonSettings ++ Publish.coreSettings ++ Format.settings ++ Testing.settings)
   .settings(
     name := "play-swagger",
     libraryDependencies ++= Dependencies.playTest ++
@@ -26,8 +22,21 @@ lazy val playSwagger = project.in(file("core"))
     scalaVersion := "2.12.4"
   )
 
+lazy val playSwaggerJackson = project.in(file("jackson"))
+  .settings(Publish.commonSettings ++ Publish.coreSettings ++ Format.settings ++ Testing.settings)
+  .settings(
+    name := "play-swagger-jackson",
+    libraryDependencies ++= Dependencies.playTest ++
+      Dependencies.playRoutesCompiler ++
+      Dependencies.playJson ++
+      Dependencies.jackson ++
+      Dependencies.javaCompat ++
+      Dependencies.javaTest,
+    scalaVersion := "2.12.4"
+  ).dependsOn(playSwagger)
+
 lazy val sbtPlaySwagger = project.in(file("sbtPlugin"))
-  .settings(Publish.sbtPluginSettings ++ Format.settings)
+  .settings(Publish.commonSettings ++ Publish.sbtPluginSettings ++ Format.settings)
   .settings(
     addSbtPlugin("com.typesafe.sbt" %% "sbt-native-packager" % "1.3.1" % Provided),
     addSbtPlugin("com.typesafe.sbt" %% "sbt-web" % "1.4.3" % Provided))
@@ -41,9 +50,9 @@ lazy val sbtPlaySwagger = project.in(file("sbtPlugin"))
     scalaVersion := "2.12.4",
     scripted := scripted.dependsOn(publishLocal in playSwagger).evaluated,
 
-    scriptedLaunchOpts := { scriptedLaunchOpts.value ++
-      Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
+    scriptedLaunchOpts := {
+      scriptedLaunchOpts.value ++
+        Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
     },
     scriptedBufferLog := false
   )
-

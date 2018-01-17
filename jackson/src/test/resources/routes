@@ -1,0 +1,18 @@
+###
+#  summary: Sign in user and get token
+#  parameters:
+#    - name: body
+#      schema:
+#        $ref: '#/components/schemas/com.github.nstojiljkovic.playSwagger.jackson.ParentModel'
+#  responses:
+#    200:
+#      description: Login reponse in case of success
+#      schema:
+#        $ref: '#/components/schemas/com.github.nstojiljkovic.playSwagger.jackson.ChildModel'
+#    401:
+#      description: Unsuccessful login
+#      schema:
+#        $ref: '#/components/schemas/com.github.nstojiljkovic.playSwagger.jackson.ChildModel'
+###
++ nocsrf
+POST        /signIn        controllers.SampleController.process

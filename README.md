@@ -74,7 +74,7 @@ You can find the setup in the example project as well.
 #### Step 1
 For play2.6 add Swagger sbt plugin dependency to your plugins.sbt
 ```scala
-addSbtPlugin("com.github.nstojiljkovic" % "sbt-play-swagger" % "0.7.4")
+addSbtPlugin("com.github.nstojiljkovic" % "sbt-play-swagger" % "0.7.6")
 ```
 
 ```

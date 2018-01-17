@@ -1,0 +1,9 @@
+---
+  swagger: "3.0"
+  info:
+    title: "Sample API"
+    version: "0.0.1"
+  consumes:
+    - application/json
+  produces:
+    - application/json
