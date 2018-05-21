@@ -364,7 +364,7 @@ final case class SwaggerSpecGenerator(
         paramList ← route.call.parameters.toSeq
         param ← paramList
         if param.fixed.isEmpty // Removes parameters the client cannot set
-      } yield mapParam(param, modelQualifier, customMappings)
+      } yield mapParam(new SwaggerParameterMapper.Parameter(param), modelQualifier, customMappings)
 
       JsArray(params.flatMap { p ⇒
         val jos: List[JsObject] = p match {

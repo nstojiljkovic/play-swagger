@@ -1,9 +1,9 @@
 package com.github.nstojiljkovic.playSwagger
 
 import org.specs2.mutable.Specification
-import play.api.libs.json.{ Json, JsString }
+import play.api.libs.json.{ JsString, Json }
 import com.github.nstojiljkovic.playSwagger.Domain._
-import play.routes.compiler.Parameter
+import com.github.nstojiljkovic.playSwagger.SwaggerParameterMapper.Parameter
 
 class SwaggerParameterMapperSpec extends Specification {
   "mapParam" >> {
@@ -11,7 +11,7 @@ class SwaggerParameterMapperSpec extends Specification {
     implicit val cl = this.getClass.getClassLoader
 
     "map org.joda.time.DateTime to integer with format epoch" >> {
-      mapParam(Parameter("fieldWithDateTime", "org.joda.time.DateTime", None, None)) === GenSwaggerParameter(
+      mapParam(Parameter("fieldWithDateTime", "org.joda.time.DateTime", None, None, None)) === GenSwaggerParameter(
         name = "fieldWithDateTime",
         `type` = Option("integer"),
         format = Option("epoch"))
@@ -24,7 +24,7 @@ class SwaggerParameterMapperSpec extends Specification {
           "org.joda.time.DateTime",
           specAsParameter = specAsParameter))
 
-        val parameter = mapParam(Parameter("fieldWithDateTimeOverRide", "org.joda.time.DateTime", None, None), customMappings = mappings)
+        val parameter = mapParam(Parameter("fieldWithDateTimeOverRide", "org.joda.time.DateTime", None, None, None), customMappings = mappings)
         parameter.name mustEqual "fieldWithDateTimeOverRide"
         parameter must beAnInstanceOf[CustomSwaggerParameter]
         parameter.asInstanceOf[CustomSwaggerParameter].specAsParameter === specAsParameter
@@ -35,7 +35,7 @@ class SwaggerParameterMapperSpec extends Specification {
         val mappings: CustomMappings = List(CustomTypeMapping(
           "org.joda.time.DateTime",
           specAsProperty = Some(specAsProperty)))
-        val parameter = mapParam(Parameter("seqWithDateTimeOverRide", "Option[Seq[org.joda.time.DateTime]]", None, None), customMappings = mappings).asInstanceOf[GenSwaggerParameter]
+        val parameter = mapParam(Parameter("seqWithDateTimeOverRide", "Option[Seq[org.joda.time.DateTime]]", None, None, None), customMappings = mappings).asInstanceOf[GenSwaggerParameter]
 
         parameter.name mustEqual "seqWithDateTimeOverRide"
         parameter.required must beFalse
@@ -53,28 +53,28 @@ class SwaggerParameterMapperSpec extends Specification {
       val mappings: CustomMappings = List(CustomTypeMapping(
         "java.util.Date",
         specAsParameter = specAsParameter))
-      val parameter = mapParam(Parameter("fieldWithDate", "java.util.Date", None, None), customMappings = mappings)
+      val parameter = mapParam(Parameter("fieldWithDate", "java.util.Date", None, None, None), customMappings = mappings)
       parameter.name mustEqual "fieldWithDate"
       parameter must beAnInstanceOf[CustomSwaggerParameter]
       parameter.asInstanceOf[CustomSwaggerParameter].specAsParameter === specAsParameter
     }
 
     "map Any to any with example value" >> {
-      mapParam(Parameter("fieldWithAny", "Any", None, None)) === GenSwaggerParameter(
+      mapParam(Parameter("fieldWithAny", "Any", None, None, None)) === GenSwaggerParameter(
         name = "fieldWithAny",
         `type` = Option("any"),
         example = Option(JsString("any JSON value")))
     }
 
     "map java enum to enum constants" >> {
-      mapParam(Parameter("javaEnum", "com.github.nstojiljkovic.playSwagger.SampleJavaEnum", None, None)) === GenSwaggerParameter(
+      mapParam(Parameter("javaEnum", "com.github.nstojiljkovic.playSwagger.SampleJavaEnum", None, None, None)) === GenSwaggerParameter(
         name = "javaEnum",
         `type` = Option("string"),
         enum = Option(Seq("DISABLED", "ACTIVE")))
     }
 
     "map scala enum to enum constants" >> {
-      mapParam(Parameter("scalaEnum", "com.github.nstojiljkovic.playSwagger.SampleScalaEnum.Value", None, None)) === GenSwaggerParameter(
+      mapParam(Parameter("scalaEnum", "com.github.nstojiljkovic.playSwagger.SampleScalaEnum.Value", None, None, None)) === GenSwaggerParameter(
         name = "scalaEnum",
         `type` = Option("string"),
         enum = Option(Seq("One", "Two")))
@@ -82,7 +82,7 @@ class SwaggerParameterMapperSpec extends Specification {
 
     //TODO: for sequences, should the nested required be ignored?
     "map Option[Seq[T]] to item type" >> {
-      mapParam(Parameter("aField", "Option[Seq[String]]", None, None)) === GenSwaggerParameter(
+      mapParam(Parameter("aField", "Option[Seq[String]]", None, None, None)) === GenSwaggerParameter(
         name = "aField",
         required = false,
         `type` = Some("array"),
@@ -100,7 +100,7 @@ class SwaggerParameterMapperSpec extends Specification {
         specAsParameter = specAsParameter), CustomTypeMapping(
         "java.time.Duration",
         specAsParameter = specAsParameter))
-      val parameter = mapParam(Parameter("strField", "String", None, None), customMappings = mappings)
+      val parameter = mapParam(Parameter("strField", "String", None, None, None), customMappings = mappings)
       parameter.name mustEqual "strField"
       parameter must beAnInstanceOf[GenSwaggerParameter]
       parameter.asInstanceOf[GenSwaggerParameter].`type` must beSome("string")
@@ -108,21 +108,21 @@ class SwaggerParameterMapperSpec extends Specification {
     }
 
     "map default value to content without quotes when provided with string without quotes" >> {
-      mapParam(Parameter("strField", "String", None, Some("defaultValue"))) === GenSwaggerParameter(
+      mapParam(Parameter("strField", "String", None, Some("defaultValue"), None)) === GenSwaggerParameter(
         name = "strField",
         `type` = Option("string"),
         required = false,
         default = Option(JsString("defaultValue")))
     }
     "map default value to content without quotes when provided with string with simple quotes" >> {
-      mapParam(Parameter("strField", "String", None, Some("\"defaultValue\""))) === GenSwaggerParameter(
+      mapParam(Parameter("strField", "String", None, Some("\"defaultValue\""), None)) === GenSwaggerParameter(
         name = "strField",
         `type` = Option("string"),
         required = false,
         default = Option(JsString("defaultValue")))
     }
     "map default value to content without quotes when provided with string with triple quotes" >> {
-      mapParam(Parameter("strField", "String", None, Some("\"\"\"defaultValue\"\"\""))) === GenSwaggerParameter(
+      mapParam(Parameter("strField", "String", None, Some("\"\"\"defaultValue\"\"\""), None)) === GenSwaggerParameter(
         name = "strField",
         `type` = Option("string"),
         required = false,

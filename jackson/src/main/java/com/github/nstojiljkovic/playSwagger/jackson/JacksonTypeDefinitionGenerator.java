@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
+import com.github.nstojiljkovic.playSwagger.SwaggerParameterMapper.Parameter;
 import com.github.nstojiljkovic.playSwagger.TypeDefinitionGenerator;
-import play.routes.compiler.Parameter;
 import scala.Option;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
@@ -25,49 +25,41 @@ public class JacksonTypeDefinitionGenerator implements TypeDefinitionGenerator {
         this.jsonSchemaGenerator = new JsonSchemaGenerator(mapper);
     }
 
-    private String wrapRequired(String tpe, Boolean required) {
-        if (required != null && required) {
-            return "scala.Option[" + tpe + "]";
-        } else {
-            return tpe;
-        }
-    }
-
     private String getTypeName(final JsonSchema schema) {
         switch (schema.getType()) {
             case STRING:
-                return wrapRequired("java.lang.String", schema.getRequired());
+                return "java.lang.String";
             case NUMBER:
                 // possible improvement: make differentiation between Double and Float
-                return wrapRequired("scala.Double", schema.getRequired());
+                return "scala.Double";
             case INTEGER:
                 // possible improvement: make differentiation between Long and Int
-                return wrapRequired("scala.Long", schema.getRequired());
+                return "scala.Long";
             case BOOLEAN:
-                return wrapRequired("scala.Boolean", schema.getRequired());
+                return "scala.Boolean";
             case OBJECT:
                 if (schema.get$ref() != null) {
                     final String s = schema.get$ref().replace("urn:jsonschema:", "").replaceAll(":", ".");
-                    return wrapRequired(s, schema.getRequired());
+                    return s;
                 } else if (schema.getId() != null) {
                     final String s = schema.getId().replace("urn:jsonschema:", "").replaceAll(":", ".");
-                    return wrapRequired(s, schema.getRequired());
+                    return s;
                 } else {
-                    return wrapRequired("scala.Any", schema.getRequired());
+                    return "scala.Any";
                 }
             case ARRAY:
                 if (schema.asArraySchema().getItems().isSingleItems()) {
                     JsonSchema itemsSchema = schema.asArraySchema().getItems().asSingleItems().getSchema();
-                    return wrapRequired("scala.Seq[" + getTypeName(itemsSchema) + "]", schema.getRequired());
+                    return "scala.Seq[" + getTypeName(itemsSchema) + "]";
                 } else {
                     // possible improvement: support for multiple item types
-                    return wrapRequired("scala.Seq[scala.Any]", schema.getRequired());
+                    return "scala.Seq[scala.Any]";
                 }
             case NULL:
-                return wrapRequired("scala.Null", schema.getRequired());
+                return "scala.Null";
             case ANY:
             default:
-                return wrapRequired("scala.Any", schema.getRequired());
+                return "scala.Any";
         }
     }
 
@@ -85,7 +77,7 @@ public class JacksonTypeDefinitionGenerator implements TypeDefinitionGenerator {
                     if (propertySchema == null) {
                         continue;
                     }
-                    final Parameter parameter = Parameter.apply(entry.getKey(), getTypeName(propertySchema), none, none);
+                    final Parameter parameter = new Parameter(entry.getKey(), getTypeName(propertySchema), none, none, Option.apply(propertySchema));
                     parameters.add(parameter);
                 }
             }

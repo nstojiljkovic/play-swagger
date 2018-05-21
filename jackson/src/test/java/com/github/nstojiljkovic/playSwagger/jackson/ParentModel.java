@@ -1,5 +1,7 @@
 package com.github.nstojiljkovic.playSwagger.jackson;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class ParentModel {
@@ -15,6 +17,7 @@ public class ParentModel {
         this.children = children;
     }
 
+    @JsonProperty(required = true)
     public String getSampleField() {
         return sampleField;
     }

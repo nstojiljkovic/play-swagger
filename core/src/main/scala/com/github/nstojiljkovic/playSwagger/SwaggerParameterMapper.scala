@@ -1,15 +1,24 @@
 package com.github.nstojiljkovic.playSwagger
 
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema
+import com.fasterxml.jackson.module.jsonSchema.types.StringSchema
 import com.github.nstojiljkovic.playSwagger.Domain.{ CustomMappings, CustomSwaggerParameter, GenSwaggerParameter, SwaggerParameter }
 import play.api.libs.json._
-import play.routes.compiler.Parameter
-import scala.reflect.runtime.universe
 
+import scala.reflect.runtime.universe
 import scala.util.Try
+import scala.util.parsing.input.Positional
 
 object SwaggerParameterMapper {
 
   type MappingFunction = PartialFunction[String, SwaggerParameter]
+
+  case class Parameter(name: String, typeName: String, fixed: Option[String], default: Option[String], jsonSchema: Option[JsonSchema]) extends Positional {
+    def this(playRoutesParameter: play.routes.compiler.Parameter) =
+      this(playRoutesParameter.name, playRoutesParameter.typeName, playRoutesParameter.fixed, playRoutesParameter.default, None)
+
+    override def toString = name + ":" + typeName + fixed.map(" = " + _).getOrElse("") + default.map(" ?= " + _) + jsonSchema.map(", schema = " + _).getOrElse("")
+  }
 
   def mapParam(
     parameter:      Parameter,
@@ -46,17 +55,47 @@ object SwaggerParameterMapper {
       }
     }
 
+    // Use JSON schema's "required" annotation (if JSON schema is defined)
+    val required = parameter.jsonSchema
+      .map(schema ⇒
+        Option(schema.getRequired).exists(_.booleanValue()))
+      .getOrElse(defaultValueO.isEmpty)
+
+    val fallbackFormat: Option[String] = parameter.jsonSchema.flatMap({
+      case s: StringSchema ⇒
+        if (s.getFormat != null && s.getFormat.toString != "")
+          Some(s.getFormat.toString)
+        else
+          None
+      case _ ⇒
+        None
+    })
+
+    val fallbackEnum: Option[Seq[String]] = parameter.jsonSchema.flatMap({
+      case s: StringSchema ⇒
+        import scala.collection.JavaConverters._
+        if (s.getEnums.isEmpty)
+          None
+        else
+          Some(s.getEnums.asScala.toSeq)
+      case _ ⇒
+        None
+    })
+
     def genSwaggerParameter(
       tp:     String,
       format: Option[String]      = None,
-      enum:   Option[Seq[String]] = None) =
+      enum:   Option[Seq[String]] = None) = {
+
       GenSwaggerParameter(
         parameter.name,
         `type` = Some(tp),
-        format = format,
-        required = defaultValueO.isEmpty,
+        format = format.orElse(fallbackFormat),
+        required = required,
+        // @todo: derive default value from Jackson JSON schema (if present)
         default = defaultValueO,
-        enum = enum)
+        enum = enum.orElse(fallbackEnum))
+    }
 
     val enumParamMF: MappingFunction = {
       case JavaEnum(enumConstants)  ⇒ genSwaggerParameter("string", enum = Option(enumConstants))
@@ -66,7 +105,10 @@ object SwaggerParameterMapper {
     def isReference(tpeName: String = typeName): Boolean = modelQualifier.isModel(tpeName)
 
     def referenceParam(referenceType: String) =
-      GenSwaggerParameter(parameter.name, referenceType = Some(referenceType))
+      GenSwaggerParameter(
+        parameter.name,
+        referenceType = Some(referenceType),
+        required = required)
 
     def optionalParam(optionalTpe: String) = {
       val asRequired = mapParam(parameter.copy(typeName = optionalTpe), modelQualifier = modelQualifier, customMappings = customMappings)

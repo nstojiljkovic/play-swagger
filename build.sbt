@@ -17,9 +17,10 @@ lazy val playSwagger = project.in(file("core"))
     libraryDependencies ++= Dependencies.playTest ++
       Dependencies.playRoutesCompiler ++
       Dependencies.playJson ++
+      Dependencies.jackson ++
       Dependencies.test ++
       Dependencies.yaml,
-    scalaVersion := "2.12.4"
+    scalaVersion := "2.12.6"
   )
 
 lazy val playSwaggerJackson = project.in(file("jackson"))
@@ -32,7 +33,7 @@ lazy val playSwaggerJackson = project.in(file("jackson"))
       Dependencies.jackson ++
       Dependencies.javaCompat ++
       Dependencies.javaTest,
-    scalaVersion := "2.12.4"
+    scalaVersion := "2.12.6"
   ).dependsOn(playSwagger)
 
 lazy val sbtPlaySwagger = project.in(file("sbtPlugin"))
@@ -47,7 +48,7 @@ lazy val sbtPlaySwagger = project.in(file("sbtPlugin"))
     name := "sbt-play-swagger",
     description := "sbt plugin for play swagger spec generation",
     sbtPlugin := true,
-    scalaVersion := "2.12.4",
+    scalaVersion := "2.12.6",
     scripted := scripted.dependsOn(publishLocal in playSwagger).evaluated,
 
     scriptedLaunchOpts := {

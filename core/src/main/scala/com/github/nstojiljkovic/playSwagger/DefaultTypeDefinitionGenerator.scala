@@ -1,5 +1,6 @@
 package com.github.nstojiljkovic.playSwagger
-import play.routes.compiler.Parameter
+
+import com.github.nstojiljkovic.playSwagger.SwaggerParameterMapper.Parameter
 
 import scala.reflect.runtime.universe._
 
@@ -21,7 +22,7 @@ class DefaultTypeDefinitionGenerator extends TypeDefinitionGenerator {
       val name = field.name.decodedName.toString
       val typeName = dealiasParams(field.typeSignature).toString
       // passing None for 'fixed' and 'default' here, since we're not dealing with route parameters
-      Parameter(name, typeName, None, None)
+      Parameter(name, typeName, None, None, None)
     }
   }
 }

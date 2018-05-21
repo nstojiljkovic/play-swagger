@@ -49,8 +49,7 @@
           }
         },
         "required": [
-          "childSampleField",
-          "anotherChildSampleField"
+          "childSampleField"
         ]
       },
       "com.github.nstojiljkovic.playSwagger.jackson.ParentModel": {
@@ -73,10 +72,7 @@
           }
         },
         "required": [
-          "sampleField",
-          "anotherSampleField",
-          "firstChild",
-          "children"
+          "sampleField"
         ]
       }
     }

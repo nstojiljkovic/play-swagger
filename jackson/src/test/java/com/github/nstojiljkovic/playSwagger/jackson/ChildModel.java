@@ -1,5 +1,7 @@
 package com.github.nstojiljkovic.playSwagger.jackson;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ChildModel {
     private Boolean childSampleField;
     private Integer anotherChildSampleField;
@@ -9,6 +11,7 @@ public class ChildModel {
         this.anotherChildSampleField = anotherChildSampleField;
     }
 
+    @JsonProperty(required = true)
     public Boolean getChildSampleField() {
         return childSampleField;
     }

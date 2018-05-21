@@ -1,6 +1,10 @@
 package com.github.nstojiljkovic.playSwagger.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.*;
+import com.github.nstojiljkovic.playSwagger.SwaggerParameterMapper;
+import com.github.nstojiljkovic.playSwagger.SwaggerParameterMapper.Parameter;
 import com.github.nstojiljkovic.playSwagger.SwaggerSpecGenerator;
 import com.github.nstojiljkovic.playSwagger.TypeDefinitionGenerator;
 import org.apache.commons.io.IOUtils;
@@ -9,14 +13,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import play.api.libs.json.JsObject;
 import play.api.libs.json.StaticBinding;
-import play.routes.compiler.Parameter;
 import scala.Option;
 import scala.collection.JavaConverters;
 import static scala.collection.JavaConverters.seqAsJavaList;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -26,23 +27,36 @@ public class JacksonTypeDefinitionGeneratorTest {
     @Test
     public void jackson() {
         final Option<String> none = Option.apply(null);
+        final Option<JsonSchema> noneSchema = Option.apply(null);
         final ObjectMapper mapper = new ObjectMapper();
         final JacksonTypeDefinitionGenerator jacksonTypeDefinitionGenerator = new JacksonTypeDefinitionGenerator(mapper);
-        final List<Parameter> childParameters = seqAsJavaList(jacksonTypeDefinitionGenerator.parameters(ChildModel.class, getClass().getClassLoader()));
-        final List<Parameter> expectedChildParameters = Arrays.asList(
-                Parameter.apply("childSampleField", "scala.Boolean", none, none),
-                Parameter.apply("anotherChildSampleField", "scala.Long", none, none)
-        );
-        assertEquals(expectedChildParameters, childParameters);
+        final Parameter[] childParameters = seqAsJavaList(jacksonTypeDefinitionGenerator.parameters(ChildModel.class, getClass().getClassLoader())).toArray(new Parameter[0]);
+        final BooleanSchema booleanRequiredSchema = new BooleanSchema();
+        booleanRequiredSchema.setRequired(true);
+        final Parameter[] expectedChildParameters = Arrays.asList(
+                new Parameter("childSampleField", "scala.Boolean", none, none, Option.apply(booleanRequiredSchema)),
+                new Parameter("anotherChildSampleField", "scala.Long", none, none, Option.apply(new IntegerSchema()))
+        ).toArray(new Parameter[0]);
+        assertArrayEquals(expectedChildParameters, childParameters);
 
-        final List<Parameter> parentParameters = seqAsJavaList(jacksonTypeDefinitionGenerator.parameters(ParentModel.class, getClass().getClassLoader()));
-        final List<Parameter> expectedParentParameters = Arrays.asList(
-                Parameter.apply("sampleField", "java.lang.String", none, none),
-                Parameter.apply("anotherSampleField", "scala.Double", none, none),
-                Parameter.apply("firstChild", "com.github.nstojiljkovic.playSwagger.jackson.ChildModel", none, none),
-                Parameter.apply("children", "scala.Seq[com.github.nstojiljkovic.playSwagger.jackson.ChildModel]", none, none)
-        );
-        assertEquals(expectedParentParameters, parentParameters);
+        final Parameter[] parentParameters = seqAsJavaList(jacksonTypeDefinitionGenerator.parameters(ParentModel.class, getClass().getClassLoader())).toArray(new Parameter[0]);
+        final Map<String, JsonSchema> properties = new LinkedHashMap<>();
+        properties.put("childSampleField", booleanRequiredSchema);
+        properties.put("anotherChildSampleField", new IntegerSchema());
+        final ObjectSchema childObjectSchema = (new ObjectSchema());
+        childObjectSchema.setId("urn:jsonschema:com:github:nstojiljkovic:playSwagger:jackson:ChildModel");
+        childObjectSchema.setProperties(properties);
+        final ArraySchema childArraySchema = (new ArraySchema());
+        childArraySchema.setItems(new ArraySchema.SingleItems(new ReferenceSchema("urn:jsonschema:com:github:nstojiljkovic:playSwagger:jackson:ChildModel")));
+        final StringSchema stringRequiredSchema = new StringSchema();
+        stringRequiredSchema.setRequired(true);
+        final Parameter[] expectedParentParameters = Arrays.asList(
+                new Parameter("sampleField", "java.lang.String", none, none, Option.apply(stringRequiredSchema)),
+                new Parameter("anotherSampleField", "scala.Double", none, none, Option.apply(new NumberSchema())),
+                new Parameter("firstChild", "com.github.nstojiljkovic.playSwagger.jackson.ChildModel", none, none, Option.apply(childObjectSchema)),
+                new Parameter("children", "scala.Seq[com.github.nstojiljkovic.playSwagger.jackson.ChildModel]", none, none, Option.apply(childArraySchema))
+        ).toArray(new Parameter[0]);
+        assertArrayEquals(expectedParentParameters, parentParameters);
     }
 
     @Test
