@@ -1,6 +1,6 @@
 import sbt._
 import Keys._
-import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, releaseProcess, releaseStepCommand, releaseVersionFile}
+import sbtrelease.ReleasePlugin.autoImport.{ ReleaseStep, releaseProcess, releaseStepCommand, releaseVersionFile }
 import sbtrelease.ReleaseStateTransformations._
 
 object Publish {
@@ -29,24 +29,24 @@ object Publish {
       pushChanges),
     pomExtra := (
       <url>https://github.com/nstojiljkovic/play-swagger</url>
-        <licenses>
-          <license>
-            <name>Apache License 2.0</name>
-            <url>https://raw.githubusercontent.com/nstojiljkovic/play-swagger/master/LICENSE</url>
-            <distribution>repo</distribution>
-          </license>
-        </licenses>
-        <scm>
-          <url>git@github.com:nstojiljkovic/play-swagger.git</url>
-          <connection>scm:git@github.com:nstojiljkovic/play-swagger.git</connection>
-        </scm>
-        <developers>
-          <developer>
-            <id>nstojiljkovic</id>
-            <name>Nikola Stojiljković</name>
-            <url>https://github.com/nstojiljkovic</url>
-          </developer>
-        </developers>),
+      <licenses>
+        <license>
+          <name>Apache License 2.0</name>
+          <url>https://raw.githubusercontent.com/nstojiljkovic/play-swagger/master/LICENSE</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:nstojiljkovic/play-swagger.git</url>
+        <connection>scm:git@github.com:nstojiljkovic/play-swagger.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>nstojiljkovic</id>
+          <name>Nikola Stojiljković</name>
+          <url>https://github.com/nstojiljkovic</url>
+        </developer>
+      </developers>),
     publishArtifact in Test := false)
 
   val coreSettings = commonSettings
