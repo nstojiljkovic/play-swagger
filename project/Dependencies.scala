@@ -1,10 +1,11 @@
 import sbt._
 
 object Dependencies {
+
   object Versions {
-    val play = "2.6.6"
-    val playJson = "2.6.0"
-    val specs2 = "3.8.9"
+    val play = "2.7.0"
+    val playJson = "2.7.1"
+    val specs2 = "4.4.1"
   }
 
   val playTest = Seq(
@@ -17,7 +18,7 @@ object Dependencies {
     "com.typesafe.play" %% "play-json" % Versions.playJson % "provided")
 
   val yaml = Seq(
-    "org.yaml" % "snakeyaml" % "1.18")
+    "org.yaml" % "snakeyaml" % "1.23")
 
   val test = Seq(
     "org.specs2" %% "specs2-core" % Versions.specs2 % "test",
@@ -25,11 +26,12 @@ object Dependencies {
 
   val javaTest = Seq(
     "junit" % "junit" % "4.12" % "test",
-    "com.novocode" % "junit-interface" % "0.11" % "test")
+    "com.novocode" % "junit-interface" % "0.11" % "test",
+    "org.skyscreamer" % "jsonassert" % "1.5.0" % "test")
 
   val javaCompat = Seq(
-    "org.scala-lang.modules" % "scala-java8-compat_2.12" % "0.8.0")
+    "org.scala-lang.modules" % "scala-java8-compat_2.12" % "0.9.0")
 
   val jackson = Seq(
-    "com.fasterxml.jackson.module" % "jackson-module-jsonSchema" % "2.8.11")
+    "com.fasterxml.jackson.module" % "jackson-module-jsonSchema" % "2.9.8")
 }

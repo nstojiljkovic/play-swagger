@@ -1,7 +1,6 @@
 package com.github.nstojiljkovic.playSwagger
 
 import play.api.libs.json.{ JsObject, JsPath, JsValue, Reads }
-import play.twirl.api.TemplateMagic.Default
 
 object Domain {
   type Path = String

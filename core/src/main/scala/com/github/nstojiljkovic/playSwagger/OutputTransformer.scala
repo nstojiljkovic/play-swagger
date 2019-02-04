@@ -1,7 +1,5 @@
 package com.github.nstojiljkovic.playSwagger
 
-import java.util.regex.Pattern
-
 import com.github.nstojiljkovic.playSwagger.OutputTransformer.SimpleOutputTransformer
 import play.api.libs.json.{ JsArray, JsString, JsValue, JsObject }
 

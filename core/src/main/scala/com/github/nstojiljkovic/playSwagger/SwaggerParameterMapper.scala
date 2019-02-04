@@ -102,7 +102,7 @@ object SwaggerParameterMapper {
       case ScalaEnum(enumConstants) ⇒ genSwaggerParameter("string", enum = Option(enumConstants))
     }
 
-    def isReference(tpeName: String = typeName): Boolean = modelQualifier.isModel(tpeName)
+    def isReference(tpeName: String): Boolean = modelQualifier.isModel(tpeName)
 
     def referenceParam(referenceType: String) =
       GenSwaggerParameter(

@@ -3,15 +3,12 @@ package com.github.nstojiljkovic.playSwagger.jackson;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.*;
-import com.github.nstojiljkovic.playSwagger.SwaggerParameterMapper;
 import com.github.nstojiljkovic.playSwagger.SwaggerParameterMapper.Parameter;
 import com.github.nstojiljkovic.playSwagger.SwaggerSpecGenerator;
 import com.github.nstojiljkovic.playSwagger.TypeDefinitionGenerator;
 import org.apache.commons.io.IOUtils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import play.api.libs.json.JsObject;
+import org.skyscreamer.jsonassert.JSONAssert;
 import play.api.libs.json.StaticBinding;
 import scala.Option;
 import scala.collection.JavaConverters;
@@ -20,7 +17,6 @@ import static scala.collection.JavaConverters.seqAsJavaList;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 public class JacksonTypeDefinitionGeneratorTest {
 
@@ -77,7 +73,7 @@ public class JacksonTypeDefinitionGeneratorTest {
                 this.getClass().getResourceAsStream("expected.json"),
                 "UTF-8"
         );
-        final String cleanedUpExpectedJson = StaticBinding.prettyPrint(StaticBinding.parseJsValue(expectedJson));
-        assertEquals(cleanedUpExpectedJson, swaggerJson);
+        JSONAssert.assertEquals(swaggerJson, expectedJson, false);
+        JSONAssert.assertEquals(expectedJson, swaggerJson, false);
     }
 }

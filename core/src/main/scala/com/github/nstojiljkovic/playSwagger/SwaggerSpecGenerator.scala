@@ -14,6 +14,8 @@ import org.yaml.snakeyaml.constructor.Constructor
 import scala.collection.immutable.ListMap
 import play.routes.compiler._
 
+import scala.collection.mutable
+import scala.language.postfixOps
 import scala.util.{ Failure, Success, Try }
 
 object SwaggerSpecGenerator {
@@ -79,11 +81,11 @@ final case class SwaggerSpecGenerator(
           Failure(new Exception(message))
         }, { rules ⇒
           val routerName = tagFromFile(routesFile)
-          val init: RoutesData = Success(ListMap(routerName → (path, Seq.empty)))
+          val init: RoutesData = Success(ListMap(routerName → ((path, Seq.empty))))
           rules.foldLeft(init) {
             case (Success(acc), route: Route) ⇒
               val (prefix, routes) = acc(routerName)
-              Success(acc + (routerName → (prefix, routes :+ route)))
+              Success(acc + (routerName → ((prefix, routes :+ route))))
             case (Success(acc), Include(prefix, router)) ⇒
               val reference = router.replace(".Routes", ".routes")
               val isIncludedRoutesFile = cl.getResource(reference) != null
@@ -126,7 +128,9 @@ final case class SwaggerSpecGenerator(
   private[playSwagger] def generateWithBase(
     paths:    ListMap[String, JsObject],
     baseJson: JsObject                  = Json.obj()): JsObject = {
-    val pathsJson = paths.values.reduce(_ ++ _)
+    val pathsJson = paths.values.foldLeft(new JsObject(mutable.LinkedHashMap()))((s, values) ⇒ {
+      values.fields.foldLeft(s)((ss, t) ⇒ ss + t)
+    })
 
     val refKey = "$ref"
     val mainRefs = (pathsJson ++ baseJson) \\ refKey
