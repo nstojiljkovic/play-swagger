@@ -72,9 +72,9 @@ You can find the setup in the example project as well.
   
 
 #### Step 1
-For play2.6 add Swagger sbt plugin dependency to your plugins.sbt
+For play 2.7 add Swagger sbt plugin dependency to your plugins.sbt
 ```scala
-addSbtPlugin("com.github.nstojiljkovic" % "sbt-play-swagger" % "0.7.6")
+addSbtPlugin("com.github.nstojiljkovic" % "sbt-play-swagger" % "0.7.10")
 ```
 
 ```
@@ -137,6 +137,14 @@ The sbt-play-swagger plugin will generate the swagger.json on `sbt run` or `sbt 
 you should be able to open the swagger ui at
 http://localhost:9000/docs/swagger-ui/index.html?url=/assets/swagger.json
 
+============================
+### Compatibility
+
+Scala Versions | Play Version | play-swagger version
+---------------|--------------|---------------------
+2.12.x         | 2.7.x        | 0.7.10
+2.12.x         | 2.6.x        | 0.7.8
+
 
 ============================
 ## How to contribute
@@ -161,6 +169,7 @@ an array of mappings. Each mapping consists of
 1. `specAsProperty`, a json object to be used when the type is used as a property in a definition. If you leave this one empty, play-swagger will try to use the first element in `specAsParameter`, please note that although most of the fields are common between the two types of spec, a couple of them aren't.
 
 For example
+
 ```yaml
 ---
   - type: java\.time\.LocalDate
