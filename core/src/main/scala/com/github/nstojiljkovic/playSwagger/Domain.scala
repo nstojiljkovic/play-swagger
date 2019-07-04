@@ -54,10 +54,10 @@ object Domain {
   object CustomTypeMapping {
     import play.api.libs.functional.syntax._
     implicit val csmFormat: Reads[CustomTypeMapping] = (
-      (JsPath \ 'type).read[String] and
-      (JsPath \ 'specAsParameter).read[List[JsObject]] and
-      (JsPath \ 'specAsProperty).readNullable[JsObject] and
-      ((JsPath \ 'required).read[Boolean] orElse Reads.pure(true)))(CustomTypeMapping.apply _)
+      (JsPath \ "type").read[String] and
+      (JsPath \ "specAsParameter").read[List[JsObject]] and
+      (JsPath \ "specAsProperty").readNullable[JsObject] and
+      ((JsPath \ "required").read[Boolean] orElse Reads.pure(true)))(CustomTypeMapping.apply _)
   }
 }
 

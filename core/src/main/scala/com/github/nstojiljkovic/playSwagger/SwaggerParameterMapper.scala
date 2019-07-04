@@ -37,48 +37,48 @@ object SwaggerParameterMapper {
     val typeName = removeKnownPrefixes(parameter.typeName)
 
     val defaultValueO: Option[JsValue] = {
-      parameter.default.map { value ⇒
+      parameter.default.map { value =>
         typeName match {
-          case ci"Int" | ci"Long"                      ⇒ JsNumber(value.toLong)
-          case ci"Double" | ci"Float" | ci"BigDecimal" ⇒ JsNumber(value.toDouble)
-          case ci"Boolean"                             ⇒ JsBoolean(value.toBoolean)
-          case ci"String" ⇒ {
+          case ci"Int" | ci"Long"                      => JsNumber(value.toLong)
+          case ci"Double" | ci"Float" | ci"BigDecimal" => JsNumber(value.toDouble)
+          case ci"Boolean"                             => JsBoolean(value.toBoolean)
+          case ci"String" => {
             val noquotes = value match {
-              case c if c.startsWith("\"\"\"") && c.endsWith("\"\"\"") ⇒ c.substring(3, c.length - 3)
-              case c if c.startsWith("\"") && c.endsWith("\"") ⇒ c.substring(1, c.length - 1)
-              case c ⇒ c
+              case c if c.startsWith("\"\"\"") && c.endsWith("\"\"\"") => c.substring(3, c.length - 3)
+              case c if c.startsWith("\"") && c.endsWith("\"") => c.substring(1, c.length - 1)
+              case c => c
             }
             JsString(noquotes)
           }
-          case _ ⇒ JsString(value)
+          case _ => JsString(value)
         }
       }
     }
 
     // Use JSON schema's "required" annotation (if JSON schema is defined)
     val required = parameter.jsonSchema
-      .map(schema ⇒
+      .map(schema =>
         Option(schema.getRequired).exists(_.booleanValue()))
       .getOrElse(defaultValueO.isEmpty)
 
     val fallbackFormat: Option[String] = parameter.jsonSchema.flatMap({
-      case s: StringSchema ⇒
+      case s: StringSchema =>
         if (s.getFormat != null && s.getFormat.toString != "")
           Some(s.getFormat.toString)
         else
           None
-      case _ ⇒
+      case _ =>
         None
     })
 
     val fallbackEnum: Option[Seq[String]] = parameter.jsonSchema.flatMap({
-      case s: StringSchema ⇒
+      case s: StringSchema =>
         import scala.collection.JavaConverters._
         if (s.getEnums.isEmpty)
           None
         else
           Some(s.getEnums.asScala.toSeq)
-      case _ ⇒
+      case _ =>
         None
     })
 
@@ -98,8 +98,8 @@ object SwaggerParameterMapper {
     }
 
     val enumParamMF: MappingFunction = {
-      case JavaEnum(enumConstants)  ⇒ genSwaggerParameter("string", enum = Option(enumConstants))
-      case ScalaEnum(enumConstants) ⇒ genSwaggerParameter("string", enum = Option(enumConstants))
+      case JavaEnum(enumConstants)  => genSwaggerParameter("string", enum = Option(enumConstants))
+      case ScalaEnum(enumConstants) => genSwaggerParameter("string", enum = Option(enumConstants))
     }
 
     def isReference(tpeName: String): Boolean = modelQualifier.isModel(tpeName)
@@ -115,32 +115,32 @@ object SwaggerParameterMapper {
       asRequired.update(required = false, default = asRequired.default)
     }
 
-    def updateGenParam(param: SwaggerParameter)(update: GenSwaggerParameter ⇒ GenSwaggerParameter): SwaggerParameter = param match {
-      case p: GenSwaggerParameter ⇒ update(p)
-      case _                      ⇒ param
+    def updateGenParam(param: SwaggerParameter)(update: GenSwaggerParameter => GenSwaggerParameter): SwaggerParameter = param match {
+      case p: GenSwaggerParameter => update(p)
+      case _                      => param
     }
 
     val referenceParamMF: MappingFunction = {
-      case tpe if isReference(tpe) ⇒ referenceParam(tpe)
+      case tpe if isReference(tpe) => referenceParam(tpe)
     }
 
     val optionalParamMF: MappingFunction = {
-      case tpe if higherOrderType("Option", typeName).isDefined ⇒
+      case tpe if higherOrderType("Option", typeName).isDefined =>
         optionalParam(higherOrderType("Option", typeName).get)
     }
 
     val generalParamMF: MappingFunction = {
-      case ci"Int"                     ⇒ genSwaggerParameter("integer", Some("int32"))
-      case ci"Long"                    ⇒ genSwaggerParameter("integer", Some("int64"))
-      case ci"Double" | ci"BigDecimal" ⇒ genSwaggerParameter("number", Some("double"))
-      case ci"Float"                   ⇒ genSwaggerParameter("number", Some("float"))
-      case ci"DateTime"                ⇒ genSwaggerParameter("integer", Some("epoch"))
-      case ci"Any"                     ⇒ genSwaggerParameter("any").copy(example = Some(JsString("any JSON value")))
-      case unknown                     ⇒ genSwaggerParameter(unknown.toLowerCase())
+      case ci"Int"                     => genSwaggerParameter("integer", Some("int32"))
+      case ci"Long"                    => genSwaggerParameter("integer", Some("int64"))
+      case ci"Double" | ci"BigDecimal" => genSwaggerParameter("number", Some("double"))
+      case ci"Float"                   => genSwaggerParameter("number", Some("float"))
+      case ci"DateTime"                => genSwaggerParameter("integer", Some("epoch"))
+      case ci"Any"                     => genSwaggerParameter("any").copy(example = Some(JsString("any JSON value")))
+      case unknown                     => genSwaggerParameter(unknown.toLowerCase())
     }
 
     val itemsParamMF: MappingFunction = {
-      case tpe if collectionItemType(tpe).isDefined ⇒
+      case tpe if collectionItemType(tpe).isDefined =>
         // TODO: This could use a different type to represent ItemsObject(http://swagger.io/specification/#itemsObject),
         // since the structure is not quite the same, and still has to be handled specially in a json transform (see propWrites in SwaggerSpecGenerator)
         // However, that spec conflicts with example code elsewhere that shows other fields in the object, such as properties:
@@ -150,10 +150,10 @@ object SwaggerParameterMapper {
             mapParam(parameter.copy(typeName = collectionItemType(tpe).get), modelQualifier, customMappings))))
     }
 
-    val customMappingMF: MappingFunction = customMappings.map { mapping ⇒
+    val customMappingMF: MappingFunction = customMappings.map { mapping =>
       val re = StringContext(removeKnownPrefixes(mapping.`type`)).ci
       val mf: MappingFunction = {
-        case re() ⇒
+        case re() =>
           CustomSwaggerParameter(
             parameter.name,
             mapping.specAsParameter,
@@ -198,8 +198,8 @@ object SwaggerParameterMapper {
           val mirror = universe.runtimeMirror(cl)
           val module = mirror.reflectModule(mirror.staticModule(tpeName.stripSuffix(".Value")))
           for {
-            enum ← Option(module.instance).toSeq if enum.isInstanceOf[Enumeration]
-            value ← enum.asInstanceOf[Enumeration].values.asInstanceOf[Iterable[Enumeration#Value]]
+            enum <- Option(module.instance).toSeq if enum.isInstanceOf[Enumeration]
+            value <- enum.asInstanceOf[Enumeration].values.asInstanceOf[Iterable[Enumeration#Value]]
           } yield value.toString
         }.toOption.filterNot(_.isEmpty)
       } else

@@ -60,15 +60,15 @@ final case class SwaggerSpecGenerator(
     def loop(path: String, routesFile: String): RoutesData = {
 
       // TODO: better error handling
-      ResourceReader.read(routesFile).flatMap { lines ⇒
+      ResourceReader.read(routesFile).flatMap { lines =>
         val content = lines.mkString("\n")
         // artificial file to conform to api, used by play for error reporting
         val file = new File(routesFile)
 
         def errorMessage(error: RoutesCompilationError) = {
           val lineNumber = error.line.fold("")(":" + _ + error.column.fold("")(":" + _))
-          val errorLine = error.line.flatMap { line ⇒
-            val caret = error.column.map(c ⇒ (" " * (c - 1)) + "^").getOrElse("")
+          val errorLine = error.line.flatMap { line =>
+            val caret = error.column.map(c => (" " * (c - 1)) + "^").getOrElse("")
             lines.lift(line - 1).map(_ + "\n" + caret)
           }.getOrElse("")
           s"""|Error parsing routes file: ${error.source.getName}$lineNumber ${error.message}
@@ -76,17 +76,17 @@ final case class SwaggerSpecGenerator(
               |""".stripMargin
         }
 
-        RoutesFileParser.parseContent(content, file).fold({ errors ⇒
+        RoutesFileParser.parseContent(content, file).fold({ errors =>
           val message = errors.map(errorMessage).mkString("\n")
           Failure(new Exception(message))
-        }, { rules ⇒
+        }, { rules =>
           val routerName = tagFromFile(routesFile)
-          val init: RoutesData = Success(ListMap(routerName → ((path, Seq.empty))))
+          val init: RoutesData = Success(ListMap(routerName -> ((path, Seq.empty))))
           rules.foldLeft(init) {
-            case (Success(acc), route: Route) ⇒
+            case (Success(acc), route: Route) =>
               val (prefix, routes) = acc(routerName)
-              Success(acc + (routerName → ((prefix, routes :+ route))))
-            case (Success(acc), Include(prefix, router)) ⇒
+              Success(acc + (routerName -> ((prefix, routes :+ route))))
+            case (Success(acc), Include(prefix, router)) =>
               val reference = router.replace(".Routes", ".routes")
               val isIncludedRoutesFile = cl.getResource(reference) != null
               if (isIncludedRoutesFile) {
@@ -94,14 +94,14 @@ final case class SwaggerSpecGenerator(
                 loop(updated, reference).map(acc ++ _)
               } else Success(acc)
 
-            case (l @ Failure(_), _) ⇒ l
+            case (l @ Failure(_), _) => l
           }
         })
       }
     }
 
     // starts with empty prefix, assuming that the routesFile is the outermost (usually 'routes')
-    loop("", routesFile).flatMap { data ⇒
+    loop("", routesFile).flatMap { data =>
       val result: JsObject = generateFromRoutes(data, base)
       val initial = SimpleOutputTransformer(Success[JsObject])
       val mapper = outputTransformers.foldLeft[OutputTransformer](initial)(_ >=> _)
@@ -112,15 +112,15 @@ final case class SwaggerSpecGenerator(
   /**
    * Generate directly from routes
    *
-   * @param routes [[Route]]s compiled by Play routes compiler
+   * @param routes Routes compiled by Play routes compiler
    * @param base
    * @return
    */
   def generateFromRoutes(routes: ListMap[Tag, (String, Seq[Route])], base: JsObject = defaultBase): JsObject = {
     val docs = routes.map {
-      case (tag, (prefix, routes)) ⇒
+      case (tag, (prefix, routes)) =>
         //val subTag = if (tag == tagFromFile(routesFile)) None else Some(tag)
-        tag → paths(routes, prefix, Some(tag))
+        tag -> paths(routes, prefix, Some(tag))
     }.filter(_._2.keys.nonEmpty)
     generateWithBase(docs, base)
   }
@@ -128,23 +128,23 @@ final case class SwaggerSpecGenerator(
   private[playSwagger] def generateWithBase(
     paths:    ListMap[String, JsObject],
     baseJson: JsObject                  = Json.obj()): JsObject = {
-    val pathsJson = paths.values.foldLeft(new JsObject(mutable.LinkedHashMap()))((s, values) ⇒ {
-      values.fields.foldLeft(s)((ss, t) ⇒ ss + t)
+    val pathsJson = paths.values.foldLeft(new JsObject(mutable.LinkedHashMap()))((s, values) => {
+      values.fields.foldLeft(s)((ss, t) => ss + t)
     })
 
     val refKey = "$ref"
     val mainRefs = (pathsJson ++ baseJson) \\ refKey
     val customMappingRefs = for {
-      customMapping ← customMappings
+      customMapping <- customMappings
       mappingsJson = customMapping.specAsProperty.toSeq ++ customMapping.specAsParameter
-      ref ← mappingsJson.flatMap(_ \\ refKey)
+      ref <- mappingsJson.flatMap(_ \\ refKey)
     } yield ref
-    val allRefs = mainRefs ++ customMappingRefs
+    val allRefs = Seq.empty ++ mainRefs ++ customMappingRefs
 
     val definitions: List[Definition] = {
       val referredClasses: Seq[String] = for {
-        refJson ← allRefs
-        ref ← refJson.asOpt[String]
+        refJson <- allRefs
+        ref <- refJson.asOpt[String]
         className = ref.stripPrefix(referencePrefix)
         if modelQualifier.isModel(className)
       } yield className
@@ -152,31 +152,31 @@ final case class SwaggerSpecGenerator(
       DefinitionGenerator(modelQualifier, customMappings).allDefinitions(referredClasses)
     }
 
-    val definitionsJson = JsObject(definitions.map(d ⇒ d.name → Json.toJson(d)))
+    val definitionsJson = JsObject(definitions.map(d => d.name -> Json.toJson(d)))
 
     //TODO: remove hardcoded path
     val generatedTagsJson = JsArray(
       paths.keys
         //.filterNot(_ == RoutesFileReader.rootRoute)
-        .map(tag ⇒ Json.obj("name" → tag)).toSeq)
+        .map(tag => Json.obj("name" -> tag)).toSeq)
 
     val tagsJson = mergeByName(generatedTagsJson, (baseJson \ "tags").asOpt[JsArray].getOrElse(JsArray()))
 
     val pathsAndDefinitionsJson = Json.obj(
-      "paths" → pathsJson,
+      "paths" -> pathsJson,
       if (swaggerV3) {
-        "components" → Json.obj(
+        "components" -> Json.obj(
           "schemas" -> definitionsJson)
       } else {
-        "definitions" → definitionsJson
+        "definitions" -> definitionsJson
       })
 
-    pathsAndDefinitionsJson.deepMerge(baseJson) + ("tags" → tagsJson)
+    pathsAndDefinitionsJson.deepMerge(baseJson) + ("tags" -> tagsJson)
   }
 
   private def referencePrefix = if (swaggerV3) "#/components/schemas/" else "#/definitions/"
 
-  private val refWrite = OWrites((refType: String) ⇒ Json.obj("$ref" → JsString(referencePrefix + refType)))
+  private val refWrite = OWrites((refType: String) => Json.obj("$ref" -> JsString(referencePrefix + refType)))
 
   import play.api.libs.functional.syntax._
 
@@ -184,71 +184,71 @@ final case class SwaggerSpecGenerator(
     val under = if (swaggerV3) __ \ "schema" else __
 
     (
-      (__ \ 'name).write[String] ~
+      (__ \ "name").write[String] ~
       (__ \ "schema").writeNullable[String](refWrite) ~
-      (under \ 'type).writeNullable[String] ~
-      (under \ 'format).writeNullable[String] ~
-      (__ \ 'required).write[Boolean] ~
-      (under \ 'default).writeNullable[JsValue] ~
-      (under \ 'example).writeNullable[JsValue] ~
+      (under \ "type").writeNullable[String] ~
+      (under \ "format").writeNullable[String] ~
+      (__ \ "required").write[Boolean] ~
+      (under \ "default").writeNullable[JsValue] ~
+      (under \ "example").writeNullable[JsValue] ~
       (under \ "items").writeNullable[SwaggerParameter](propWrites) ~
       (under \ "enum").writeNullable[Seq[String]])(unlift(GenSwaggerParameter.unapply))
   }
 
   private def customParamWrites(csp: CustomSwaggerParameter): List[JsObject] = {
     csp.specAsParameter match {
-      case head :: tail ⇒
+      case head :: tail =>
         def withPrefix(input: JsObject): JsObject = {
           if (swaggerV3) Json.obj("schema" -> input) else input
         }
 
         val under = if (swaggerV3) __ \ "schema" else __
         val w = (
-          (__ \ 'name).write[String] ~
-          (__ \ 'required).write[Boolean] ~
-          (under \ 'default).writeNullable[JsValue])(
-            (c: CustomSwaggerParameter) ⇒ (c.name, c.required, c.default))
+          (__ \ "name").write[String] ~
+          (__ \ "required").write[Boolean] ~
+          (under \ "default").writeNullable[JsValue])(
+            (c: CustomSwaggerParameter) => (c.name, c.required, c.default))
 
         (w.writes(csp) ++ withPrefix(head)) :: tail
-      case Nil ⇒ Nil
+      case Nil => Nil
     }
   }
 
-  private lazy val customPropWrites: Writes[CustomSwaggerParameter] = Writes { cwp ⇒
-    (__ \ 'default).writeNullable[JsValue].writes(cwp.default) ++
+  private lazy val customPropWrites: Writes[CustomSwaggerParameter] = Writes { cwp =>
+    (__ \ "default").writeNullable[JsValue].writes(cwp.default) ++
       (cwp.specAsProperty orElse cwp.specAsParameter.headOption).getOrElse(Json.obj())
   }
 
   private lazy val propWrites: Writes[SwaggerParameter] = Writes {
-    case g: GenSwaggerParameter    ⇒ genPropWrites.writes(g)
-    case c: CustomSwaggerParameter ⇒ customPropWrites.writes(c)
+    case g: GenSwaggerParameter    => genPropWrites.writes(g)
+    case c: CustomSwaggerParameter => customPropWrites.writes(c)
   }
 
   private lazy val genPropWrites: Writes[GenSwaggerParameter] = (
-    (__ \ 'type).writeNullable[String] ~
-    (__ \ 'format).writeNullable[String] ~
-    (__ \ 'default).writeNullable[JsValue] ~
-    (__ \ 'example).writeNullable[JsValue] ~
+    (__ \ "type").writeNullable[String] ~
+    (__ \ "format").writeNullable[String] ~
+    (__ \ "default").writeNullable[JsValue] ~
+    (__ \ "example").writeNullable[JsValue] ~
     (__ \ "$ref").writeNullable[String] ~
     (__ \ "items").lazyWriteNullable[SwaggerParameter](propWrites) ~
-    (__ \ "enum").writeNullable[Seq[String]])(p ⇒ (p.`type`, p.format, p.default, p.example, p.referenceType.map(referencePrefix + _), p.items, p.enum))
+    (__ \ "enum").writeNullable[Seq[String]])(p => (p.`type`, p.format, p.default, p.example, p.referenceType.map(referencePrefix + _), p.items, p.enum))
 
   implicit class PathAdditions(path: JsPath) {
     def writeNullableIterable[A <: Iterable[_]](implicit writes: Writes[A]): OWrites[A] =
-      OWrites[A] { (a: A) ⇒
+      OWrites[A] { (a: A) =>
         if (a.isEmpty) Json.obj()
-        else JsPath.createObj(path → writes.writes(a))
+        else JsPath.createObj(path -> writes.writes(a))
       }
   }
 
-  private implicit val propertiesWriter: Writes[Seq[SwaggerParameter]] = Writes[Seq[SwaggerParameter]] { ps ⇒
-    JsObject(ps.map(p ⇒ p.name → Json.toJson(p)(propWrites)))
+  private implicit val propertiesWriter: Writes[Seq[SwaggerParameter]] = Writes[Seq[SwaggerParameter]] { ps =>
+    JsObject(ps.map(p => p.name -> Json.toJson(p)(propWrites)))
   }
 
   private implicit val defFormat: Writes[Definition] = (
-    (__ \ 'description).writeNullable[String] ~
-    (__ \ 'properties).write[Seq[SwaggerParameter]] ~
-    (__ \ 'required).writeNullable[Seq[String]])((d: Definition) ⇒ (d.description, d.properties, requiredProperties(d.properties)))
+    (__ \ "description").writeNullable[String] ~
+    (__ \ "properties").write[Seq[SwaggerParameter]] ~
+    (__ \ "required").writeNullable[Seq[String]])((d: Definition) => (d.description, d.properties, requiredProperties(d.properties)))
 
   private def requiredProperties(properties: Seq[SwaggerParameter]): Option[Seq[String]] = {
     val required = properties.filter(_.required).map(_.name)
@@ -266,30 +266,30 @@ final case class SwaggerSpecGenerator(
   }
 
   private def mergeByName(base: JsArray, toMerge: JsArray): JsArray = {
-    JsArray(base.value.map { bs ⇒
+    JsArray(base.value.map { bs =>
       val name = (bs \ "name").as[String]
-      findByName(toMerge, name).fold(bs) { f ⇒ bs.as[JsObject] deepMerge f }
-    } ++ toMerge.value.filter { tm ⇒
-      (tm \ "name").validate[String].fold({ errors ⇒ true }, { name ⇒
+      findByName(toMerge, name).fold(bs) { f => bs.as[JsObject] deepMerge f }
+    } ++ toMerge.value.filter { tm =>
+      (tm \ "name").validate[String].fold({ errors => true }, { name =>
         findByName(base, name).isEmpty
       })
     })
   }
 
   private def findByName(array: JsArray, name: String): Option[JsObject] =
-    array.value.find(param ⇒ (param \ "name").asOpt[String].contains(name))
+    array.value.find(param => (param \ "name").asOpt[String].contains(name))
       .map(_.as[JsObject])
 
   private[playSwagger] def readCfgFile[T](name: String)(implicit fjs: Reads[T]): Option[T] = {
-    Option(cl.getResource(name)).map { url ⇒
+    Option(cl.getResource(name)).map { url =>
       val st = url.openStream()
       try {
         val ext = url.getFile.split("\\.").last
         ext match {
-          case "json"  ⇒ Json.parse(st).as[T]
+          case "json"  => Json.parse(st).as[T]
           //TODO: improve error handling
-          case "yml"   ⇒ parseYaml(read(st).get.mkString("\n"))
-          case unknown ⇒ throw new IllegalArgumentException(s"$name has an unsupported extension. Use either json or yml. ")
+          case "yml"   => parseYaml(read(st).get.mkString("\n"))
+          case unknown => throw new IllegalArgumentException(s"$name has an unsupported extension. Use either json or yml. ")
         }
       } finally {
         st.close()
@@ -307,7 +307,7 @@ final case class SwaggerSpecGenerator(
 
   private def paths(routes: Seq[Route], prefix: String, tag: Option[Tag]): JsObject = {
     JsObject {
-      val endPointEntries = routes.flatMap(route ⇒ endPointEntry(route, prefix, tag))
+      val endPointEntries = routes.flatMap(route => endPointEntry(route, prefix, tag))
 
       // maintain the routes order as per the original routing file
       val zgbp = endPointEntries.zipWithIndex.groupBy(_._1._1)
@@ -315,7 +315,7 @@ final case class SwaggerSpecGenerator(
       val lhm = LinkedHashMap(zgbp.toSeq sortBy (_._2.head._2): _*)
       val gbp2 = lhm mapValues (_ map (_._1)) toSeq
 
-      gbp2.toSeq.map(x ⇒ (x._1, x._2.map(_._2).reduce(_ deepMerge _)))
+      gbp2.toSeq.map(x => (x._1, x._2.map(_._2).reduce(_ deepMerge _)))
     }
   }
 
@@ -327,11 +327,11 @@ final case class SwaggerSpecGenerator(
       None
     } else {
       val inRoutePath = route.path.parts.map {
-        case DynamicPart(name, _, _) ⇒ s"{$name}"
-        case StaticPart(value)       ⇒ value
+        case DynamicPart(name, _, _) => s"{$name}"
+        case StaticPart(value)       => value
       }.mkString
       val method = route.verb.value.toLowerCase
-      Some(fullPath(prefix, inRoutePath) → Json.obj(method → endPointSpec(route, tag)))
+      Some(fullPath(prefix, inRoutePath) -> Json.obj(method -> endPointSpec(route, tag)))
     }
   }
 
@@ -350,7 +350,7 @@ final case class SwaggerSpecGenerator(
 
     def tryParseYaml(comment: String): Option[JsObject] = {
       val pattern = "^\\w+:".r
-      pattern.findFirstIn(comment).map(_ ⇒ parseYaml[JsObject](comment))
+      pattern.findFirstIn(comment).map(_ => parseYaml[JsObject](comment))
     }
 
     def tryParseJson(comment: String): Option[JsObject] = {
@@ -361,31 +361,31 @@ final case class SwaggerSpecGenerator(
 
     val paramsFromController = {
       val pathParams = route.path.parts.collect {
-        case d: DynamicPart ⇒ d.name
+        case d: DynamicPart => d.name
       }.toSet
 
       val params = for {
-        paramList ← route.call.parameters.toSeq
-        param ← paramList
+        paramList <- route.call.parameters.toSeq
+        param <- paramList
         if param.fixed.isEmpty && !param.isJavaRequest // Removes parameters the client cannot set
       } yield mapParam(new SwaggerParameterMapper.Parameter(param), modelQualifier, customMappings)
 
-      JsArray(params.flatMap { p ⇒
+      JsArray(params.flatMap { p =>
         val jos: List[JsObject] = p match {
-          case gsp: GenSwaggerParameter    ⇒ List(genParamWrites.writes(gsp))
-          case csp: CustomSwaggerParameter ⇒ customParamWrites(csp)
+          case gsp: GenSwaggerParameter    => List(genParamWrites.writes(gsp))
+          case csp: CustomSwaggerParameter => customParamWrites(csp)
         }
 
         val in = if (pathParams.contains(p.name)) "path" else "query"
-        val enhance = Json.obj("in" → in)
+        val enhance = Json.obj("in" -> in)
         jos.map(enhance ++ _)
       })
     }
 
     def amendBodyParam(params: JsArray): JsArray = {
       val bodyParam = findByName(params, "body")
-      bodyParam.fold(params) { param ⇒
-        val enhancedBodyParam = Json.obj("in" → JsString("body")) ++ param
+      bodyParam.fold(params) { param =>
+        val enhancedBodyParam = Json.obj("in" -> JsString("body")) ++ param
         JsArray(enhancedBodyParam +: params.value.filterNot(_ == bodyParam.get))
       }
     }
@@ -395,34 +395,34 @@ final case class SwaggerSpecGenerator(
 
       val comments = route.comments.map(_.comment)
       val commentDocLines = comments match {
-        case `marker` +: docs :+ `marker` ⇒ docs
-        case _                            ⇒ Nil
+        case `marker` +: docs :+ `marker` => docs
+        case _                            => Nil
       }
 
       for {
-        leadingSpace ← commentDocLines.headOption.flatMap("""^(\s*)""".r.findFirstIn)
+        leadingSpace <- commentDocLines.headOption.flatMap("""^(\s*)""".r.findFirstIn)
         comment = commentDocLines.map(_.drop(leadingSpace.length)).mkString("\n")
-        result ← tryParseJson(comment) orElse tryParseYaml(comment)
+        result <- tryParseJson(comment) orElse tryParseYaml(comment)
       } yield result
     }
 
-    val paramsFromComment = jsonFromComment.flatMap(jc ⇒ (jc \ "parameters").asOpt[JsArray]).map(amendBodyParam)
+    val paramsFromComment = jsonFromComment.flatMap(jc => (jc \ "parameters").asOpt[JsArray]).map(amendBodyParam)
 
     val mergedParams = mergeByName(paramsFromController, paramsFromComment.getOrElse(JsArray()))
 
-    val parameterJson = if (mergedParams.value.nonEmpty) Json.obj("parameters" → mergedParams) else Json.obj()
+    val parameterJson = if (mergedParams.value.nonEmpty) Json.obj("parameters" -> mergedParams) else Json.obj()
 
     val operationId = Json.obj(
-      "operationId" → route.call.method)
+      "operationId" -> route.call.method)
 
-    val rawPathJson = operationId ++ tag.fold(Json.obj()) { t ⇒
-      Json.obj("tags" → List(t))
+    val rawPathJson = operationId ++ tag.fold(Json.obj()) { t =>
+      Json.obj("tags" -> List(t))
     } ++ jsonFromComment.getOrElse(Json.obj()) ++ parameterJson
 
     val hasConsumes = (rawPathJson \ "consumes").toOption.isDefined
 
     if (findByName(mergedParams, "body").isDefined && !hasConsumes)
-      rawPathJson + ("consumes" → Json.arr(defaultPostBodyFormat))
+      rawPathJson + ("consumes" -> Json.arr(defaultPostBodyFormat))
     else rawPathJson
   }
 }

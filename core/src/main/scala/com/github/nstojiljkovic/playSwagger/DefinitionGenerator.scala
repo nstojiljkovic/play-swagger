@@ -10,7 +10,7 @@ final case class DefinitionGenerator(
   mappings:       CustomMappings       = Nil)(implicit cl: ClassLoader, typeDefinitionGenerator: TypeDefinitionGenerator) {
 
   def dealiasParams(t: Type): Type = {
-    appliedType(t.dealias.typeConstructor, t.typeArgs.map { arg ⇒
+    appliedType(t.dealias.typeConstructor, t.typeArgs.map { arg =>
       dealiasParams(arg.dealias)
     })
   }
@@ -35,26 +35,26 @@ final case class DefinitionGenerator(
 
   def allDefinitions(typeNames: Seq[String]): List[Definition] = {
     def genSwaggerParameter: PartialFunction[SwaggerParameter, GenSwaggerParameter] =
-      { case p: GenSwaggerParameter ⇒ p }
+      { case p: GenSwaggerParameter => p }
 
     def allReferredDefs(defName: String, memo: List[Definition]): List[Definition] = {
       memo.find(_.name == defName) match {
-        case Some(_) ⇒ memo
-        case None ⇒
+        case Some(_) => memo
+        case None =>
           val thisDef = definition(defName)
           val refNames: Seq[String] = for {
-            p ← thisDef.properties.collect(genSwaggerParameter)
-            className ← p.referenceType orElse p.items.collect(genSwaggerParameter).flatMap(_.referenceType)
+            p <- thisDef.properties.collect(genSwaggerParameter)
+            className <- p.referenceType orElse p.items.collect(genSwaggerParameter).flatMap(_.referenceType)
             if modelQualifier.isModel(className)
           } yield className
 
-          refNames.foldLeft(thisDef :: memo) { (foundDefs, refName) ⇒
+          refNames.foldLeft(thisDef :: memo) { (foundDefs, refName) =>
             allReferredDefs(refName, foundDefs)
           }
       }
     }
 
-    typeNames.foldLeft(List.empty[Definition]) { (memo, typeName) ⇒
+    typeNames.foldLeft(List.empty[Definition]) { (memo, typeName) =>
       allReferredDefs(typeName, memo)
     }
   }

@@ -46,7 +46,7 @@ object SwaggerPlugin extends AutoPlugin {
       file
     }.value,
     unmanagedResourceDirectories in Assets += swaggerTarget.value,
-    mappings in (Compile, packageBin) += (swaggerTarget.value / swaggerFileName.value) → s"public/${swaggerFileName.value}", //include it in the unmanagedResourceDirectories in Assets doesn't automatically include it package
+    mappings in (Compile, packageBin) += (swaggerTarget.value / swaggerFileName.value) -> s"public/${swaggerFileName.value}", //include it in the unmanagedResourceDirectories in Assets doesn't automatically include it package
     packageBin in Universal := (packageBin in Universal).dependsOn(swagger).value,
     run := (run in Compile).dependsOn(swagger).evaluated,
     stage := stage.dependsOn(swagger).value)

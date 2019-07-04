@@ -74,7 +74,7 @@ You can find the setup in the example project as well.
 #### Step 1
 For play 2.7 add Swagger sbt plugin dependency to your plugins.sbt
 ```scala
-addSbtPlugin("com.github.nstojiljkovic" % "sbt-play-swagger" % "0.7.10")
+addSbtPlugin("com.github.nstojiljkovic" % "sbt-play-swagger" % "0.7.11")
 ```
 
 ```
@@ -142,7 +142,7 @@ http://localhost:9000/docs/swagger-ui/index.html?url=/assets/swagger.json
 
 Scala Versions | Play Version | play-swagger version
 ---------------|--------------|---------------------
-2.12.x         | 2.7.x        | 0.7.10
+2.12.x         | 2.7.x        | 0.7.11
 2.12.x         | 2.6.x        | 0.7.8
 
 

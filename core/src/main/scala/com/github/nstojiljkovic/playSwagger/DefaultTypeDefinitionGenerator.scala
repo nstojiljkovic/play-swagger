@@ -1,12 +1,13 @@
 package com.github.nstojiljkovic.playSwagger
 
 import com.github.nstojiljkovic.playSwagger.SwaggerParameterMapper.Parameter
+import scala.collection.immutable.Seq
 
 import scala.reflect.runtime.universe._
 
 class DefaultTypeDefinitionGenerator extends TypeDefinitionGenerator {
   def dealiasParams(t: Type): Type = {
-    appliedType(t.dealias.typeConstructor, t.typeArgs.map { arg ⇒
+    appliedType(t.dealias.typeConstructor, t.typeArgs.map { arg =>
       dealiasParams(arg.dealias)
     })
   }
@@ -14,10 +15,10 @@ class DefaultTypeDefinitionGenerator extends TypeDefinitionGenerator {
   override def parameters(clazz: Class[_])(implicit cl: ClassLoader): Seq[Parameter] = {
     val tpe = runtimeMirror(cl).classSymbol(clazz).toType
     val fields = tpe.decls.collectFirst {
-      case m: MethodSymbol if m.isPrimaryConstructor ⇒ m
+      case m: MethodSymbol if m.isPrimaryConstructor => m
     }.toList.flatMap(_.paramLists).headOption.getOrElse(Nil)
 
-    fields.map { field ⇒
+    fields.map { field =>
       //TODO: find a better way to get the string representation of typeSignature
       val name = field.name.decodedName.toString
       val typeName = dealiasParams(field.typeSignature).toString
